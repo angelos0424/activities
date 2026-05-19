@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: activities-api
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/activities}
+    username: ${DATABASE_USER:activities}
+    password: ${DATABASE_PASSWORD:activities}
+  flyway:
+    enabled: true
+    schemas: meetings
+    default-schema: meetings
+
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
