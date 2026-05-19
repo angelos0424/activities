@@ -87,8 +87,7 @@ CREATE INDEX idx_chunks_transcript ON meetings.transcript_chunks (transcript_id)
 CREATE INDEX idx_chunks_config ON meetings.transcript_chunks (embedding_config_id);
 CREATE INDEX idx_chunks_embedding
     ON meetings.transcript_chunks
-    USING ivfflat (embedding vector_cosine_ops)
-    WITH (lists = 50);
+    USING hnsw (embedding vector_cosine_ops);
 
 CREATE TABLE meetings.action_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
