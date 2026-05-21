@@ -29,7 +29,7 @@ assignees: ""
 - 공통/루트 파일 변경 시 PR 본문에 이유 명시
 - 다른 서비스 동작 변경 금지
 
-Service: sns | recipe | todo
+Service: <sns | recipe | todo>
 
 Paths:
 - `sns/**` 또는 `recipe/**` 또는 `todo/**`
