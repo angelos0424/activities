@@ -11,6 +11,7 @@ This repository is scaffolded for the stack reviewed from GitHub issue #4:
 - Backend: Java Spring Boot REST API scaffold
 - Data: PostgreSQL with pgvector, initialized through Flyway SQL migrations
 - Local infra: Docker Compose for the database
+- Product requirements: see `docs/prd.md`
 
 ## Project layout
 
