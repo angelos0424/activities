@@ -32,6 +32,6 @@ assignees: ""
 Service: <sns | recipe | todo>
 
 Paths:
-- `sns/**` 또는 `recipe/**` 또는 `todo/**`
+- <sns/** | recipe/** | todo/**>
 
 Target-Branch: main
