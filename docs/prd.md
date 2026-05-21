@@ -2,11 +2,61 @@
 
 Source: GitHub issue #4 attachment `ExportBlock-bd73c755-7d8a-4bb8-83b2-54b696c1157b.zip`.
 
-## 1. Product Summary
+Status: superseded for the current SNS MVP.
+
+## Current MVP Direction
+
+Activities의 현재 실행 방향은 Discord 특정 채널에서 slash command로 사용하는
+업무 자동화 봇이다. 별도 웹 앱, 모바일 패키징, 브라우저 업로드/리포트 화면을
+먼저 만들지 않고, 사용자가 이미 일하는 Discord 채널 안에서 최소 비용으로
+필요한 자동화 흐름을 검증한다.
+
+전면 수정 사유:
+
+1. 현재 MVP에서 당장 필요한 것은 별도 웹 제품이 아니라 Discord 안에서 실행되는
+   작은 자동화 명령이다.
+2. 웹 UI, OCR provider, 회의록 분석/검색, 리포트 화면을 동시에 만들면 초기 비용과
+   검증 범위가 커진다.
+3. Discord bot 우선 접근은 명령 입력, 파일 첨부, 결과 응답을 하나의 채널에서
+   검증할 수 있어 운영 비용과 구현 범위를 줄인다.
+
+## Current MVP Goals
+
+1. Discord 특정 채널에서 slash command로 업무 자동화 기능을 실행한다.
+2. 명령어 입력, 파일 첨부, 결과 응답을 Discord 안에서 완료한다.
+3. SNS, 영수증, Todo 같은 작은 도메인 명령을 단계적으로 추가한다.
+4. 처리 결과는 Discord 메시지로 요약하고, 필요한 경우 저장소나 Google Sheets에 기록한다.
+5. 웹 UI 없이도 MVP 핵심 업무 흐름을 검증할 수 있게 한다.
+
+## Current MVP Non-goals
+
+1. React/Vite 기반 웹 앱 구현.
+2. 브라우저 기반 영수증 업로드 화면.
+3. OCR provider 구현을 전제로 한 영수증 자동 추출.
+4. 회의록 업로드, 분석, 검색, 리포트 화면.
+5. Capacitor 기반 Android 앱 출시.
+6. 자체 LLM 또는 자체 임베딩 서버 운영.
+7. 대규모 데이터 파티셔닝, 아카이빙, 멀티 테넌트 조직 관리.
+
+## Current MVP Acceptance Criteria
+
+1. 사용자는 지정된 Discord 채널에서 MVP slash command를 실행할 수 있다.
+2. 허용되지 않은 채널의 명령은 도메인 처리 전에 거부된다.
+3. 봇은 성공, 검증 실패, 권한 실패, 내부 오류를 Discord 메시지로 명확히 응답한다.
+4. 첫 도메인 명령은 외부 provider 없이도 로컬 테스트가 가능하다.
+5. 웹/OCR/회의록/리포트 작업은 아래 legacy section에 보존되며 현재 실행 큐와 분리된다.
+
+## Superseded Legacy Web/OCR/Meeting Plan
+
+아래 내용은 기존 웹 앱, OCR, 회의록 분석, 리포트 화면 중심 계획을 보존한 것이다.
+현재 MVP 범위가 아니며, 새 Discord bot 방향과 충돌하지 않도록 deferred 상태로
+분리한다. future issue가 명시적으로 재활성화하기 전까지 아래 항목은 실행 큐가 아니다.
+
+## Legacy 1. Product Summary
 
 Activities는 로그인 없이 사용할 수 있는 소규모 업무 보조 웹 애플리케이션이다. 첫 버전은 회계 영수증 처리와 회의록 요약/검색을 제공하고, 이후 Capacitor 기반 Android 패키징을 고려한다.
 
-## 2. Goals
+## Legacy 2. Goals
 
 1. 회계 담당자가 영수증 이미지를 업로드하면 OCR로 비용 데이터를 추출하고 저장한다.
 2. 매일 정해진 시간에 미지급 건을 정산하고 지정 메일로 알림을 보낸다.
@@ -14,7 +64,7 @@ Activities는 로그인 없이 사용할 수 있는 소규모 업무 보조 웹 
 4. 저장된 회의록과 청크 임베딩을 기반으로 회의 내용, 결정사항, 후속업무를 검색한다.
 5. 회의 상세 화면에서 요약 보고서를 확인하고 출력할 수 있다.
 
-## 3. Non-goals for MVP
+## Legacy 3. Non-goals for MVP
 
 1. 로그인/권한 관리.
 2. Google Spreadsheet 또는 Google Docs 양방향 동기화.
@@ -23,7 +73,7 @@ Activities는 로그인 없이 사용할 수 있는 소규모 업무 보조 웹 
 5. 대규모 데이터 파티셔닝, 아카이빙, 멀티 테넌트 조직 관리.
 6. 영수증 승인 워크플로우 전체 구현.
 
-## 4. Target Users
+## Legacy 4. Target Users
 
 | User | Need |
 | --- | --- |
@@ -31,7 +81,7 @@ Activities는 로그인 없이 사용할 수 있는 소규모 업무 보조 웹 
 | 회의 참여자/기록 담당자 | TXT 회의록을 업로드하고 요약, 결정사항, 후속업무를 확인한다. |
 | 관리자 | 회의 보고서를 검색, 확인, 출력한다. |
 
-## 5. Core User Flows
+## Legacy 5. Core User Flows
 
 ### 5.1 Accounting Flow
 
@@ -63,7 +113,7 @@ Activities는 로그인 없이 사용할 수 있는 소규모 업무 보조 웹 
 2. 서버가 키워드 검색과 벡터 검색을 조합해 관련 청크를 찾는다.
 3. UI가 관련 회의, 발화자, 시간 구간, 결정사항을 표시한다.
 
-## 6. Functional Requirements
+## Legacy 6. Functional Requirements
 
 ### 6.1 Frontend
 
@@ -105,7 +155,7 @@ Activities는 로그인 없이 사용할 수 있는 소규모 업무 보조 웹 
 | DB-005 | MVP에서는 `text-embedding-3-small` 기준 `VECTOR(1536)`을 사용한다. | P0 |
 | DB-006 | 원문 TXT 파일은 DB 저장을 기본으로 하고, 파일 스토리지는 확장 옵션으로 둔다. | P2 |
 
-## 7. Recommended Stack
+## Legacy 7. Recommended Stack
 
 | Layer | Choice | Rationale |
 | --- | --- | --- |
@@ -117,7 +167,7 @@ Activities는 로그인 없이 사용할 수 있는 소규모 업무 보조 웹 
 | Database | PostgreSQL + pgvector | 예상 데이터 규모가 작고 벡터 검색까지 한 저장소에서 처리 가능하다. |
 | Local infra | Docker Compose | 로컬 DB 실행과 개발 환경 재현에 충분하다. |
 
-## 8. Data Volume and Cost Assumptions
+## Legacy 8. Data Volume and Cost Assumptions
 
 | Item | Estimate |
 | --- | --- |
@@ -131,7 +181,7 @@ Activities는 로그인 없이 사용할 수 있는 소규모 업무 보조 웹 
 
 결론: MVP에서는 저장 공간과 API 비용보다 검색 품질, 요약 품질, UI 사용성을 우선한다.
 
-## 9. Acceptance Criteria
+## Legacy 9. Acceptance Criteria
 
 1. 사용자는 회계 메뉴에서 영수증 이미지를 선택할 수 있다.
 2. 사용자는 회의 메뉴에서 TXT 파일을 선택할 수 있다.
@@ -142,7 +192,7 @@ Activities는 로그인 없이 사용할 수 있는 소규모 업무 보조 웹 
 7. `embedding_configs`는 활성 임베딩 모델을 1개만 유지한다.
 8. pgvector 컬럼 차원은 실제 사용하는 임베딩 모델 차원과 일치해야 한다.
 
-## 10. Risks and Decisions
+## Legacy 10. Risks and Decisions
 
 | Topic | Decision |
 | --- | --- |
@@ -151,8 +201,9 @@ Activities는 로그인 없이 사용할 수 있는 소규모 업무 보조 웹 
 | Google Docs/Sheets | 현재 사용 중인 도구로 고려하되 MVP에서는 직접 연동하지 않는다. |
 | Authentication | MVP 범위에서 제외한다. 공개 배포 전 반드시 재검토한다. |
 | File storage | 데이터 규모가 작으므로 DB 저장을 기본으로 하고, 필요 시 S3/로컬 파일 스토리지로 분리한다. |
+| Web/OCR/meeting roadmap status | 현재 MVP에서는 보류한다. Discord bot 기반 업무 자동화가 먼저 검증된 뒤 future issue로 재검토한다. |
 
-## 11. MVP Milestones
+## Legacy 11. MVP Milestones
 
 1. Scaffold: React/Vite, Spring Boot, PostgreSQL + pgvector, Docker Compose.
 2. Meeting schema: Flyway migration, embedding config, meetings/transcripts/chunks/action_items/decisions.
@@ -161,7 +212,7 @@ Activities는 로그인 없이 사용할 수 있는 소규모 업무 보조 웹 
 5. Meeting UI: 업로드, 리스트, 상세, 검색, 보고서 출력.
 6. Accounting MVP: 영수증 이미지 업로드, OCR 결과 저장, 미지급 알림 배치.
 
-## 12. Open Questions
+## Legacy 12. Open Questions
 
 1. 영수증 비용 데이터의 최소 필드는 무엇인가? 예: 거래일, 상호, 금액, 통화, 결제수단, 메모.
 2. 지정 메일 수신자는 고정 설정인가, 화면에서 변경 가능한가?
