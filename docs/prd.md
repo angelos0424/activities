@@ -1,170 +1,95 @@
 # Activities PRD
 
-Source: GitHub issue #4 attachment `ExportBlock-bd73c755-7d8a-4bb8-83b2-54b696c1157b.zip`.
-
 ## 1. Product Summary
 
-Activities는 로그인 없이 사용할 수 있는 소규모 업무 보조 웹 애플리케이션이다. 첫 버전은 회계 영수증 처리와 회의록 요약/검색을 제공하고, 이후 Capacitor 기반 Android 패키징을 고려한다.
+Activities의 현재 MVP 목표는 Discord 특정 채널에서 slash command로 사용하는
+업무 자동화 봇이다. 사용자는 별도 웹 화면에 들어가지 않고, 지정된 Discord
+채널에서 명령어를 실행해 반복 업무를 요청하고 결과를 확인한다.
 
-## 2. Goals
+기존 웹 앱 중심 PRD는 더 이상 현재 MVP의 기준이 아니다. React/Vite 프론트엔드,
+웹 업로드 화면, 회의 상세/검색 화면, Android 패키징 경로는 보류한다.
 
-1. 회계 담당자가 영수증 이미지를 업로드하면 OCR로 비용 데이터를 추출하고 저장한다.
-2. 매일 정해진 시간에 미지급 건을 정산하고 지정 메일로 알림을 보낸다.
-3. 회의록 TXT 파일을 업로드하면 AI가 요약, 결정사항, 후속업무를 추출한다.
-4. 저장된 회의록과 청크 임베딩을 기반으로 회의 내용, 결정사항, 후속업무를 검색한다.
-5. 회의 상세 화면에서 요약 보고서를 확인하고 출력할 수 있다.
+## 2. MVP Goal
 
-## 3. Non-goals for MVP
+현재 MVP는 다음 한 문장으로 정의한다.
 
-1. 로그인/권한 관리.
-2. Google Spreadsheet 또는 Google Docs 양방향 동기화.
-3. Android 앱 출시.
-4. 자체 LLM 또는 자체 임베딩 서버 운영.
-5. 대규모 데이터 파티셔닝, 아카이빙, 멀티 테넌트 조직 관리.
-6. 영수증 승인 워크플로우 전체 구현.
+> Discord 특정 채널에서 slash command로 사용하는 업무 자동화 봇.
 
-## 4. Target Users
+핵심 제품 판단 기준은 Discord 안에서 업무 자동화 요청과 결과 확인이 끝나는지다.
+웹 UI, 프론트엔드 화면, 모바일 패키징은 이번 MVP의 완료 조건이 아니다.
+
+## 3. Goals
+
+1. 봇은 설정된 Discord 채널에서만 MVP slash command를 받는다.
+2. 사용자는 slash command로 업무 자동화 작업을 요청한다.
+3. 봇은 요청 처리 결과, 실패 사유, 다음 행동을 Discord 메시지로 반환한다.
+4. MVP 문서와 구현 계획은 Discord bot command flow를 기준으로 작성한다.
+
+## 4. Non-goals for MVP
+
+1. 웹 UI 또는 프론트엔드 화면 제공.
+2. React/Vite 클라이언트 기능 구현.
+3. Android 또는 기타 모바일 앱 패키징.
+4. 브라우저 기반 업로드, 리스트, 상세, 검색, 보고서 출력 화면.
+5. Discord 외부 채널을 위한 별도 사용자 인터페이스.
+
+## 5. Target Users
 
 | User | Need |
 | --- | --- |
-| 회계 담당자 | 영수증 이미지를 빠르게 비용 데이터로 저장하고 미지급 건 알림을 자동화한다. |
-| 회의 참여자/기록 담당자 | TXT 회의록을 업로드하고 요약, 결정사항, 후속업무를 확인한다. |
-| 관리자 | 회의 보고서를 검색, 확인, 출력한다. |
+| Discord 채널 사용자 | 업무 자동화를 slash command로 요청하고 같은 채널에서 결과를 확인한다. |
+| 운영자 | 봇이 동작할 Discord 채널과 사용할 명령 범위를 명확히 관리한다. |
 
-## 5. Core User Flows
+## 6. Core User Flow
 
-### 5.1 Accounting Flow
+```text
+Discord user
+  |
+  | slash command in configured channel
+  v
+Discord bot
+  |
+  | validate channel + command input
+  v
+Automation handler
+  |
+  | success / failure result
+  v
+Discord response message
+```
 
-1. 사용자가 회계 메뉴에서 영수증 이미지를 업로드한다.
-2. 서버가 이미지 파일을 수신하고 OCR 처리를 요청한다.
-3. 서버가 추출된 비용 데이터를 저장한다.
-4. 매일 17시에 미지급 건을 조회한다.
-5. 서버가 지정 메일로 정산/알림 메일을 발송한다.
+1. 사용자가 설정된 Discord 채널에서 slash command를 실행한다.
+2. 봇이 요청 채널과 입력값을 검증한다.
+3. 봇이 해당 업무 자동화 핸들러를 실행한다.
+4. 봇이 성공 결과 또는 실패 사유를 Discord 메시지로 응답한다.
 
-### 5.2 Meeting Upload Flow
-
-1. 사용자가 회의 메뉴에서 TXT 파일을 업로드한다.
-2. 서버가 원문 TXT를 저장하고 회의 메타데이터를 생성한다.
-3. 서버가 텍스트를 전처리하고 토큰 수를 계산한다.
-4. 서버가 회의록을 청크로 분리한다.
-5. 서버가 청크별 임베딩을 생성해 저장한다.
-6. 서버가 전체 요약, 결정사항, 후속업무 후보를 생성한다.
-7. 사용자가 회의 리스트에서 처리 상태를 확인한다.
-
-### 5.3 Meeting Detail and Report Flow
-
-1. 사용자가 회의 리스트에서 회의를 선택한다.
-2. 회의 상세에서 원문, 요약, 결정사항, 후속업무를 확인한다.
-3. 사용자가 보고서를 출력하거나 브라우저 인쇄 기능으로 저장한다.
-
-### 5.4 Meeting Search Flow
-
-1. 사용자가 검색어를 입력한다.
-2. 서버가 키워드 검색과 벡터 검색을 조합해 관련 청크를 찾는다.
-3. UI가 관련 회의, 발화자, 시간 구간, 결정사항을 표시한다.
-
-## 6. Functional Requirements
-
-### 6.1 Frontend
+## 7. Functional Requirements
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FE-001 | 회계/회의 메뉴를 제공한다. | P0 |
-| FE-002 | 회계 메뉴에서 이미지 파일 업로드 입력을 제공한다. | P0 |
-| FE-003 | 회의 메뉴에서 `.txt` 파일 업로드 입력을 제공한다. | P0 |
-| FE-004 | 회의 리스트를 날짜, 제목, 처리 상태와 함께 표시한다. | P0 |
-| FE-005 | 회의 상세 화면에서 요약, 결정사항, 후속업무, 원문을 표시한다. | P0 |
-| FE-006 | 회의 검색 입력을 제공한다. | P1 |
-| FE-007 | 보고서 확인 및 출력 화면을 제공한다. | P1 |
-| FE-008 | 모바일 웹 레이아웃을 지원한다. | P1 |
+| BOT-001 | 설정된 Discord 채널에서 slash command를 수신한다. | P0 |
+| BOT-002 | 허용되지 않은 채널의 MVP 명령은 처리하지 않는다. | P0 |
+| BOT-003 | 명령 입력값을 검증하고 잘못된 요청에는 명확한 오류를 반환한다. | P0 |
+| BOT-004 | 업무 자동화 처리 결과를 Discord 메시지로 반환한다. | P0 |
+| BOT-005 | 실패 시 사용자가 다음에 무엇을 해야 하는지 알 수 있게 응답한다. | P0 |
 
-### 6.2 Backend
+## 8. Deferred Legacy Web Scope
 
-| ID | Requirement | Priority |
-| --- | --- | --- |
-| BE-001 | 영수증 이미지 multipart 업로드 API를 제공한다. | P0 |
-| BE-002 | Google Vision API 등 OCR provider 추상화 계층을 제공한다. | P0 |
-| BE-003 | OCR 결과를 비용 데이터로 저장한다. | P0 |
-| BE-004 | 매일 17시 미지급 건 알림 배치를 실행한다. | P1 |
-| BE-005 | Resend API 등 이메일 provider 추상화 계층을 제공한다. | P1 |
-| BE-006 | 회의록 TXT multipart 업로드 API를 제공한다. | P0 |
-| BE-007 | 회의록 전처리, 토큰 계산, 청크 분할을 수행한다. | P0 |
-| BE-008 | 임베딩 생성 provider를 추상화한다. | P0 |
-| BE-009 | 회의 요약, 결정사항, 후속업무 후보를 생성한다. | P0 |
-| BE-010 | 회의 리스트/상세/검색 API를 제공한다. | P0 |
-| BE-011 | 보고서 조회용 API를 제공한다. | P1 |
+이 저장소에는 이전 웹 앱 목표에서 만든 프론트엔드, 백엔드, 데이터베이스
+스캐폴드가 남아 있다. 이 스캐폴드는 참고 자료로 유지하지만, 현재 MVP의 성공
+기준은 아니다.
 
-### 6.3 Data
+보류된 웹 중심 항목:
 
-| ID | Requirement | Priority |
-| --- | --- | --- |
-| DB-001 | PostgreSQL을 기본 저장소로 사용한다. | P0 |
-| DB-002 | pgvector로 회의 청크 임베딩을 저장하고 검색한다. | P0 |
-| DB-003 | 회의, 참석자, 원문, 청크, 후속업무, 결정사항을 구조화해 저장한다. | P0 |
-| DB-004 | 현재 활성 임베딩 모델을 `embedding_configs`로 추적한다. | P0 |
-| DB-005 | MVP에서는 `text-embedding-3-small` 기준 `VECTOR(1536)`을 사용한다. | P0 |
-| DB-006 | 원문 TXT 파일은 DB 저장을 기본으로 하고, 파일 스토리지는 확장 옵션으로 둔다. | P2 |
-
-## 7. Recommended Stack
-
-| Layer | Choice | Rationale |
-| --- | --- | --- |
-| Frontend | React + Vite | 빠른 웹 클라이언트 개발과 단순 배포에 적합하다. |
-| UI | Tailwind CSS + shadcn/ui-style components | 업로드, 리스트, 상세, 보고서 화면을 빠르게 구성할 수 있다. |
-| Mobile path | Capacitor | 웹 MVP 이후 Android 패키징 경로를 확보한다. |
-| Backend | Java Spring Boot | multipart 업로드, REST API, scheduled batch, provider 추상화에 적합하다. |
-| AI integration | Spring AI boundary | LLM/embedding provider 교체 지점을 명확히 둔다. |
-| Database | PostgreSQL + pgvector | 예상 데이터 규모가 작고 벡터 검색까지 한 저장소에서 처리 가능하다. |
-| Local infra | Docker Compose | 로컬 DB 실행과 개발 환경 재현에 충분하다. |
-
-## 8. Data Volume and Cost Assumptions
-
-| Item | Estimate |
-| --- | --- |
-| 회의 빈도 | 주 5회 |
-| 연간 회의 수 | 약 260회 |
-| 회의당 텍스트 | 약 7,000자 / 4,500 tokens |
-| 회의당 청크 | 약 10개 |
-| 연간 청크 | 약 2,600개 |
-| 연간 DB 용량 | 약 33MB |
-| 연간 AI API 비용 | 약 $1.30 수준 |
-
-결론: MVP에서는 저장 공간과 API 비용보다 검색 품질, 요약 품질, UI 사용성을 우선한다.
+1. 회계/회의 웹 메뉴.
+2. 브라우저 파일 업로드 화면.
+3. 회의 리스트, 상세, 검색, 보고서 화면.
+4. 프론트엔드 중심 사용성 요구사항.
+5. Android 패키징 경로.
 
 ## 9. Acceptance Criteria
 
-1. 사용자는 회계 메뉴에서 영수증 이미지를 선택할 수 있다.
-2. 사용자는 회의 메뉴에서 TXT 파일을 선택할 수 있다.
-3. 업로드된 회의록은 회의 리스트에 상태와 함께 표시된다.
-4. 회의 상세에서 요약, 결정사항, 후속업무 후보를 확인할 수 있다.
-5. 회의 검색은 관련 회의/청크/결정사항을 반환한다.
-6. 보고서 화면은 브라우저 인쇄 또는 PDF 저장에 적합한 레이아웃을 제공한다.
-7. `embedding_configs`는 활성 임베딩 모델을 1개만 유지한다.
-8. pgvector 컬럼 차원은 실제 사용하는 임베딩 모델 차원과 일치해야 한다.
-
-## 10. Risks and Decisions
-
-| Topic | Decision |
-| --- | --- |
-| pgvector dimension | 첨부 문서의 `VECTOR(3072)` 제안은 실제 1536차원 벡터 삽입 시 오류가 나므로 MVP는 `VECTOR(1536)`으로 시작한다. |
-| Embedding model migration | 모델 변경 시 별도 마이그레이션과 재임베딩 배치로 처리한다. |
-| Google Docs/Sheets | 현재 사용 중인 도구로 고려하되 MVP에서는 직접 연동하지 않는다. |
-| Authentication | MVP 범위에서 제외한다. 공개 배포 전 반드시 재검토한다. |
-| File storage | 데이터 규모가 작으므로 DB 저장을 기본으로 하고, 필요 시 S3/로컬 파일 스토리지로 분리한다. |
-
-## 11. MVP Milestones
-
-1. Scaffold: React/Vite, Spring Boot, PostgreSQL + pgvector, Docker Compose.
-2. Meeting schema: Flyway migration, embedding config, meetings/transcripts/chunks/action_items/decisions.
-3. Meeting upload API: TXT 업로드, 전처리, 청크 분할 저장.
-4. AI processing: 요약, 결정사항, 후속업무 후보, 임베딩 생성.
-5. Meeting UI: 업로드, 리스트, 상세, 검색, 보고서 출력.
-6. Accounting MVP: 영수증 이미지 업로드, OCR 결과 저장, 미지급 알림 배치.
-
-## 12. Open Questions
-
-1. 영수증 비용 데이터의 최소 필드는 무엇인가? 예: 거래일, 상호, 금액, 통화, 결제수단, 메모.
-2. 지정 메일 수신자는 고정 설정인가, 화면에서 변경 가능한가?
-3. 회의 TXT 파일은 CLOVA Note 형식으로 고정되는가?
-4. 보고서 출력 형식은 브라우저 인쇄면 충분한가, 별도 PDF 생성이 필요한가?
-5. 후속업무를 연결할 칸반 테이블 또는 외부 도구가 확정되어 있는가?
+1. 문서에서 프로젝트 목표가 Discord bot MVP로 명확히 보인다.
+2. MVP 목표가 "Discord 특정 채널에서 slash command로 사용하는 업무 자동화 봇"으로 명시되어 있다.
+3. 웹 UI와 프론트엔드 구현은 현재 범위에서 제외 또는 보류로 표시되어 있다.
+4. 웹 앱 중심 설명이 현재 MVP 목표와 충돌하지 않는다.

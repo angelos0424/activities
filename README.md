@@ -1,8 +1,19 @@
 # Activities
 
-Activity and idea tracking workspace.
+Activities is currently scoped as a Discord bot MVP for work automation.
 
-## Scaffold
+## Current MVP Goal
+
+The MVP goal is a work automation bot used through slash commands in a specific
+Discord channel. The bot should keep the first release focused on Discord-native
+workflows: users invoke commands in the configured channel, the bot performs the
+requested automation, and responses are returned in Discord.
+
+Web UI and frontend product work are out of scope for the current MVP. Existing
+web/client scaffolding is retained as repository context, but it is deferred and
+should not be treated as the active product goal.
+
+## Existing Scaffold
 
 This repository is scaffolded for the stack reviewed from GitHub issue #4:
 
@@ -24,6 +35,9 @@ This repository is scaffolded for the stack reviewed from GitHub issue #4:
 ```
 
 ## Local development
+
+The commands below describe the existing scaffold only. They are not the current
+MVP delivery path while the project is focused on the Discord bot.
 
 Start the database:
 
