@@ -1,7 +1,7 @@
 ---
 name: Symphony Service Task
 about: SymphonyEx가 처리할 sns / recipe / todo 서비스 작업 이슈
-title: "[sns] "
+title: "[sns | recipe | todo] "
 labels: ""
 assignees: ""
 ---
