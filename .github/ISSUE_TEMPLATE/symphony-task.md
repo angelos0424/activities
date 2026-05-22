@@ -1,8 +1,8 @@
 ---
 name: Symphony Issue
 about: 현재 SymphonyEx가 읽을 수 있는 activities 이슈 템플릿
-title: "[sns][planning] "
-labels: "sns,planning"
+title: "[service][type] "
+labels: ""
 assignees: ""
 ---
 
@@ -16,9 +16,10 @@ Planning Only / Do not implement yet
 
 ## Workflow 체크
 - [ ] `WORKFLOW.md`를 확인했다.
-- [ ] 제목이 `[service][type] 제목` 형식이다. 예: `[sns][planning]`, `[sns][task]`
+- [ ] 제목 첫 prefix가 `WORKFLOW.md`의 서비스 중 하나다: `[sns]`, `[recipe]`, `[todo]`
+- [ ] 제목 두 번째 prefix가 `WORKFLOW.md`의 작업 유형 중 하나다: `[planning]`, `[task]`, `[bug]`, `[docs]`
 - [ ] 서비스 label 1개를 지정했다: `sns`, `recipe`, `todo`
-- [ ] 작업 유형 label 1개를 지정했다: `planning`, `task`, `bug`, `documentation`
+- [ ] 작업 유형/class label 1개를 지정했다: `planning`, `task`, `bug`, `documentation`
 - [ ] 실행용 이슈라면 `Planning Only / Do not implement yet` 문구를 제거했다.
 - [ ] 실행용 이슈라면 Project `Todo`가 비어 있는지 확인했다.
 
@@ -39,6 +40,9 @@ Planning Only / Do not implement yet
 - PR 제목에 동일한 서비스 prefix 포함: `[sns]`, `[recipe]`, `[todo]`
 - PR 본문에 `Closes #<issue-number>` 포함
 - 검증 결과 요약
+
+## 제안사항 / 문의사항
+<!-- 추가 제안이나 확인이 필요한 내용이 있으면 작성해주세요. 없으면 비워두세요. -->
 
 ## 제약
 - 이슈 생성/수정 전 `WORKFLOW.md` 확인 필수
