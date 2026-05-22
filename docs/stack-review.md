@@ -1,5 +1,8 @@
 # Stack Review
 
+> Legacy note: this review came from the earlier accounting/meeting transcript scope.
+> Current MVP direction is the local Discord bot stack in `docs/tech-stack.md`.
+
 Source: GitHub issue #4 attachment `ExportBlock-bd73c755-7d8a-4bb8-83b2-54b696c1157b.zip`.
 
 ## Verdict
