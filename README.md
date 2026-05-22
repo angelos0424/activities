@@ -41,8 +41,7 @@ This repository is scaffolded for the stack reviewed from GitHub issue #4:
 - MVP tech stack: `docs/tech-stack.md`.
 - Discord command contract: `docs/discord-command-spec.md`.
 - Data schema: `docs/data-schema.md`.
-- Implementation order: `Roadmap.md`.
-- TODO index: `TODOS.md`.
+- Implementation roadmap and TODO index: `TODOS.md`.
 
 ## Project layout
 
@@ -52,7 +51,7 @@ This repository is scaffolded for the stack reviewed from GitHub issue #4:
 ├── frontend/                # React/Vite client scaffold, deferred for current MVP
 ├── docs/                    # PRDs, requirements, review notes, and architecture decisions
 ├── sns/                     # Discord bot skeleton workspace
-├── Roadmap.md               # Cross-service implementation roadmap
+├── TODOS.md                 # Cross-service implementation roadmap and TODO index
 └── docker-compose.yml       # Local PostgreSQL + pgvector
 ```
 

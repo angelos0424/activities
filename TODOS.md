@@ -1,10 +1,9 @@
-# Activities TODO Index
+# Activities TODO Roadmap
 
 Source: service PRDs and shared planning docs.
 
-Activities TODO는 PRD와 같은 구조로 관리한다. 루트 `TODOS.md`는 전체 인덱스와
-현재 우선순위만 담당하고, 실제 실행 항목은 서비스별 TODO 문서와 `Roadmap.md`에
-둔다.
+`TODOS.md` is the root execution roadmap. Service-specific TODO files keep
+detailed work items; this file keeps the overall order and cross-service tasks.
 
 ## Current MVP Source of Truth
 
@@ -23,31 +22,107 @@ unless a future issue explicitly moves them back into scope.
 | 영수증 | `docs/prd-receipts.md` | `docs/todos-receipts.md` |
 | Todo | `docs/prd-todo.md` | `docs/todos-todo.md` |
 
-## Shared Planning
+## Shared Planning Docs
 
 | Document | Purpose |
 | --- | --- |
-| `Roadmap.md` | Overall implementation order. |
 | `docs/requirements/discord-bot-mvp.md` | Discord bot MVP requirements and constraints. |
 | `docs/discord-command-spec.md` | Discord command contract. |
 | `docs/data-schema.md` | Shared data schema. |
 | `docs/tech-stack.md` | Local bot stack decisions. |
 
-## Priority
+## Current Direction
 
-1. Shared local bot foundation.
-2. 영수증: local Discord bot implementation after Google Sheets shape is confirmed.
-3. SNS 업로드: `/post` input and result tracking.
-4. Todo: Discord-based schedule flow in `#todo`, with discovery before broad implementation.
+The MVP is a Docker Compose-managed local Discord bot for one Discord server.
 
-## Cross-Service TODOs
+Services:
 
+1. SNS upload in `#sns`.
+2. Receipt and transfer tracking in `#receipt`.
+3. Todo and schedule management in `#todo`.
+
+## Phase 0: Product and Implementation Spec
+
+Goal: make the scope implementable without reinterpreting old meeting/accounting requirements.
+
+- [x] Reset PRD into service-specific documents.
+- [x] Keep root `docs/prd.md` as PRD index.
+- [x] Use root `TODOS.md` as the execution roadmap.
+- [x] Decide Discord as the shared operation surface.
+- [x] Decide local bot MVP stack.
+- [x] Decide receipt local file path: `data/receipts/{yyyy}/{MM}/{generated_filename}`.
+- [x] Add Discord command spec.
+- [x] Add shared data schema.
 - [ ] Confirm exact Google Sheets column headers with the real sheets.
 - [ ] Confirm Discord channel ids and admin role id.
-- [ ] Run engineering review after SNS feasibility is decided.
-- [x] Keep `docs/prd.md` as index only.
-- [x] Keep `TODOS.md` as index only.
-- [x] Document the shared Discord bot command namespace before implementation.
-- [x] Document the shared MVP data schema.
-- [x] Add Roadmap for cross-service implementation order.
-- [ ] Do not reintroduce the old 회계/회의록 all-in-one PRD without an explicit decision.
+
+## Phase 1: Shared Local Bot Foundation
+
+Goal: one working bot process that can receive commands in the correct channels.
+
+- [ ] Add Node.js + TypeScript bot package.
+- [ ] Add `discord.js` command registration.
+- [ ] Add Docker Compose service for the bot.
+- [ ] Add `.env.example` for bot credentials and local paths.
+- [ ] Add SQLite initialization.
+- [ ] Add command audit logging.
+- [ ] Add shared retry helper for 2 to 3 retries and final user-facing failure.
+- [ ] Add channel validation for `#sns`, `#receipt`, and `#todo`.
+
+## Phase 2: Receipt MVP
+
+Goal: reduce the highest-risk repetitive admin work first.
+
+- [ ] Implement `/receipt sheet status`.
+- [ ] Implement `/receipt sheet set`.
+- [ ] Implement People Sheet search.
+- [ ] Implement new person/org creation.
+- [ ] Implement Transfers Sheet row creation with status `송금전`.
+- [ ] Implement local receipt image save.
+- [ ] Write `receipt_local_path` back to Transfers Sheet.
+- [ ] Implement `/receipt check`.
+- [ ] Test upload, bot restart, and Google Sheets failure cases.
+
+## Phase 3: SNS MVP
+
+Goal: make cross-channel posting trackable even if some targets stay manual.
+
+- [ ] Implement `/post` command input flow.
+- [ ] Implement asset collection from Discord messages or modal file upload.
+- [ ] Store SNS post request and targets.
+- [ ] Implement homepage upload or manual upload packet.
+- [ ] Implement Instagram/Facebook feasibility path.
+- [ ] Return per-target result URL or manual action.
+- [ ] Implement retry for failed targets only.
+
+## Phase 4: Todo Prototype
+
+Goal: validate whether Discord-based todo is simpler than the current calendar workflow.
+
+- [ ] Run Todo discovery with the actual users.
+- [ ] Decide Todo storage mode: SQLite or Google Sheets.
+- [ ] Implement `/todo add`.
+- [ ] Implement `/todo list`.
+- [ ] Implement `/todo status`.
+- [ ] Add Naver map search/deep link button for location items.
+- [ ] Review whether a web/mobile companion UI is necessary.
+
+## Phase 5: Hardening
+
+Goal: make the local setup reliable enough for weekly use.
+
+- [ ] Add startup health checks.
+- [ ] Add clear setup guide for Discord bot token and Google service account.
+- [ ] Add permission checks for admin-only commands.
+- [ ] Add command-level error logging.
+- [ ] Add basic smoke tests for command handlers.
+- [ ] Add operational notes for local data location.
+
+## Deferred
+
+- Hosted deployment.
+- PostgreSQL migration for product data.
+- S3 or cloud file storage.
+- KakaoTalk automation.
+- Full web/mobile dashboard.
+- AI OCR and automatic accounting classification.

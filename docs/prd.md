@@ -21,7 +21,7 @@ Discord bot이 slash command, modal/form, 파일 입력을 처리하는 MVP다.
 | `docs/discord-command-spec.md` | Slash command, modal, button, and response contract. |
 | `docs/data-schema.md` | SQLite, Google Sheets, and local file schema. |
 | `docs/tech-stack.md` | MVP stack and local runtime decisions. |
-| `Roadmap.md` | Cross-service implementation order. |
+| `TODOS.md` | Cross-service implementation roadmap and TODO index. |
 
 ## Product Direction
 
