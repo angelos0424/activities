@@ -1,6 +1,7 @@
 # Activities
 
-Activities is currently scoped as an SNS 업무 자동화 Discord bot MVP.
+Activities is currently scoped as a local Discord bot MVP for NGO/small-group
+operations work.
 
 ## Current MVP Goal
 
@@ -9,21 +10,38 @@ Discord channels. The goal is to prove the cheapest useful workflow first:
 users should trigger small automation tasks from Discord without opening or
 maintaining a separate web application.
 
+The active service channels are:
+
+| Channel | Service |
+| --- | --- |
+| `#sns` | `sns-manager` |
+| `#receipt` | `receipt-manager` |
+| `#todo` | `todo-manager` |
+
 The earlier web app, OCR-first receipt flow, meeting transcript analysis, and
-browser report screens are preserved as deferred legacy scope in `docs/prd.md`
-and `TODOS.md`. They are not part of the current execution queue unless a future
-issue explicitly reactivates them.
+browser report screens are deferred unless a future issue explicitly
+reactivates them.
 
 ## Existing Scaffold
 
 This repository is scaffolded for the stack reviewed from GitHub issue #4:
 
-- Frontend: React + Vite, deferred for the current MVP
-- Mobile packaging path: Capacitor config, deferred for the current MVP
-- Backend: Java Spring Boot REST API scaffold, retained for automation/API support
-- Data: PostgreSQL with pgvector, retained for workflows that need persistence/search
-- Local infra: Docker Compose for the database
-- Product requirements: see `docs/prd.md`
+- Frontend: React + Vite, deferred for the current MVP.
+- Mobile packaging path: Capacitor config, deferred for the current MVP.
+- Backend: Java Spring Boot REST API scaffold, retained for automation/API support.
+- Data: PostgreSQL with pgvector, retained for workflows that need persistence/search.
+- Local infra: Docker Compose for the database.
+- Discord bot skeleton: `sns/`.
+
+## Product Documents
+
+- Product requirements index: `docs/prd.md`.
+- Per-service PRDs: `docs/prd-sns.md`, `docs/prd-receipts.md`, `docs/prd-todo.md`.
+- Discord bot MVP requirements: `docs/requirements/discord-bot-mvp.md`.
+- MVP tech stack: `docs/tech-stack.md`.
+- Discord command contract: `docs/discord-command-spec.md`.
+- Data schema: `docs/data-schema.md`.
+- Implementation roadmap and TODO index: `TODOS.md`.
 
 ## Project layout
 
@@ -31,7 +49,9 @@ This repository is scaffolded for the stack reviewed from GitHub issue #4:
 .
 ├── backend/                 # Spring Boot API scaffold, retained for automation/API support
 ├── frontend/                # React/Vite client scaffold, deferred for current MVP
-├── docs/                    # Review notes and architecture decisions
+├── docs/                    # PRDs, requirements, review notes, and architecture decisions
+├── sns/                     # Discord bot skeleton workspace
+├── TODOS.md                 # Cross-service implementation roadmap and TODO index
 └── docker-compose.yml       # Local PostgreSQL + pgvector
 ```
 

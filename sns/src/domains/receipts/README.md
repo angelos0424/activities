@@ -1,6 +1,6 @@
-# Receipts Domain
+# `receipt-manager` Domain
 
-Receipt-related business workflows for the SNS bot.
+`receipt-manager` 관련 business workflows for the local Activities bot.
 
-Use this folder for receipt use cases, validation, and domain models. Integration details
+Use this folder for `receipt-manager` use cases, validation, and domain models. Integration details
 belong under `src/integrations`.
