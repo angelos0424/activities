@@ -130,14 +130,18 @@ Planning Only / Do not implement yet
 
 ## 9. 이슈 작성 템플릿 체크리스트
 
-이슈를 올릴 때마다 다음 순서로 확인한다.
+이슈를 올릴 때마다 `.github/ISSUE_TEMPLATE/symphony-task.md`를 사용하고 다음 순서로 확인한다.
 
 1. `WORKFLOW.md`를 읽고 최신 prefix/label 규칙을 확인한다.
 2. 제목을 `[service][type] 제목` 형식으로 작성한다.
 3. 서비스 label과 작업 유형 label을 모두 지정한다.
-4. 논의용이면 `Planning Only / Do not implement yet`를 본문 상단에 적고 `Backlog` 또는 `Ready`에 둔다.
-5. 실행용이면 완료 조건, 검증 방법, 허용 경로, `Target-Branch`를 적는다.
-6. 실행용을 `Todo`로 올리기 전 기존 `Todo`가 비어 있는지 확인한다.
+4. Symphony가 읽는 plain metadata 라인을 유지한다.
+   - `Service: sns | recipe | todo`
+   - `Paths:` 아래에 허용 경로를 적는다.
+   - `Target-Branch: main`
+5. 논의용이면 `Planning Only / Do not implement yet`를 본문 상단에 적고 `Backlog` 또는 `Ready`에 둔다.
+6. 실행용이면 `Planning Only / Do not implement yet` 문구를 제거하고 완료 조건, 검증 방법, 허용 경로, `Target-Branch`를 확정한다.
+7. 실행용을 `Todo`로 올리기 전 기존 `Todo`가 비어 있는지 확인한다.
 
 ## 10. PR 규칙
 
