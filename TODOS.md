@@ -22,7 +22,8 @@ These are the first executable tasks that unblock the rest of the roadmap.
 - [ ] Define the Discord bot command inventory.
   - Output: command names, required arguments, optional arguments, success text,
     and failure text for the first MVP commands.
-  - Domains covered: Discord Bot Core, SNS, Receipts, Google Sheets, Todo.
+  - Domains covered: Discord Bot Core, SNS, Receipts, Google Sheets, Todo,
+    Deploy/Ops.
   - Validation: command spec is committed as a markdown or code-adjacent
     contract document.
 
