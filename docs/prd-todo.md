@@ -1,21 +1,26 @@
-# Todo PRD
+# Activities PRD
 
 Source: GitHub issue #4 attachment `ExportBlock-bd73c755-7d8a-4bb8-83b2-54b696c1157b.zip`.
 
-Status: active execution PRD for the Todo service documentation track.
+Status: active execution PRD for the Activities Discord bot MVP. The file path
+stays `docs/prd-todo.md` because issue #110 defines that as the current PRD
+source-of-truth path for this documentation cleanup; the product scope is the
+broader Activities bot, not only the Todo command domain.
 
 ## Document Paths and Source of Truth
 
-- Current execution 기준 문서: `docs/prd-todo.md`.
+- Current execution 기준 문서: `docs/prd-todo.md` (Activities PRD source of
+  truth).
 - Legacy 보존 문서: the `Superseded Legacy Web/OCR/Meeting Plan` section in
   this file. It preserves old product context only and is not an active work
   queue.
 - Compatibility path: `docs/prd.md` is retained as a pointer to this file so
   older references do not create a second PRD source of truth.
-- Decision: keep one Todo PRD source at `docs/prd-todo.md` instead of
+- Decision: keep one Activities PRD source at `docs/prd-todo.md` instead of
   maintaining duplicate content in both `docs/prd.md` and `docs/prd-todo.md`.
-  Todo-specific command details remain in the active MVP sections and the Todo
-  roadmap section of `docs/todos-todo.md`.
+  The `-todo` filename is a compatibility/source-of-truth path from issue #110,
+  while Todo-specific command details live in the Todo roadmap section of
+  `docs/todos-todo.md`.
 
 ## Current MVP Direction
 

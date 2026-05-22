@@ -1,30 +1,32 @@
-# Todo Roadmap
+# Activities Roadmap
 
 Source of truth for the current MVP: Discord bot workflows operated through
 slash commands in configured Discord channels.
 
 ## Document Paths and Source of Truth
 
-- Current execution 기준 문서: `docs/todos-todo.md`.
-- Legacy 보존 문서: the `Superseded and Deferred Legacy Roadmap` and
-  `Superseded and Deferred Legacy Scope` sections in this file. They preserve
-  old web/OCR/meeting tasks only and are not active queues.
+- Current execution 기준 문서: `docs/todos-todo.md` (Activities roadmap source of
+  truth).
+- Legacy 보존 문서: the `Superseded and Deferred Legacy Scope` section in this
+  file. It preserves old web/OCR/meeting tasks only and is not an active queue.
 - Compatibility path: root `TODOS.md` is retained as a pointer to this file so
   old repository references keep working without creating a second TODO source
   of truth.
-- Decision: split the Todo roadmap to `docs/todos-todo.md` and keep only a
-  compatibility pointer at `TODOS.md`. This avoids maintaining duplicate active
-  and legacy queues in two files.
+- Decision: keep one Activities roadmap source at `docs/todos-todo.md` and only
+  a compatibility pointer at `TODOS.md`. The `-todo` filename is a
+  compatibility/source-of-truth path from issue #110; the roadmap content covers
+  all active Discord bot MVP domains.
 
 ## Current MVP Source of Truth
 
 The active MVP is an Activities 업무 자동화 Discord bot operated through slash
 commands in configured Discord channels.
 
-The roadmap below separates the current execution queue from the legacy web,
-OCR, meeting transcript, and report-screen plan. Legacy items are preserved for
-context, but they are deferred and must not be picked up as active work unless a
-future issue explicitly moves them back into scope.
+The roadmap below separates the current execution queue and active domain
+roadmaps from the legacy web, OCR, meeting transcript, and report-screen plan.
+Legacy items are preserved for context, but they are deferred and must not be
+picked up as active work unless a future issue explicitly moves them back into
+scope.
 
 ## Why the Roadmap Changed
 
@@ -80,26 +82,11 @@ future issue explicitly moves them back into scope.
 - [ ] Decide Korean/English response policy.
   - Clarify whether bot responses are Korean-only, English-only, or match input.
 
----
+## Active Domain Roadmaps
 
-## Superseded and Deferred Legacy Roadmap
-
-Status: deferred. The content below is preserved from the earlier web/OCR/meeting
-roadmap and is not part of the current MVP execution queue.
-
-Re-entry rule: move one legacy item into the current queue only when a future
-issue names the domain, explains why Discord bot MVP needs it now, and includes
-targeted validation.
-
-## Legacy Boundary Notes
-
-- The former `Immediate First Steps` queue repeated the same command inventory,
-  runtime scaffold, channel enforcement, smoke command, and first-domain-command
-  tasks that now live in `Current Execution Queue`.
-- Those repeated items were removed from the legacy section. They should be
-  tracked only once, in the active queue above.
-- Legacy content below starts at domain-level roadmap preservation and keeps
-  explicit re-entry conditions for deferred work.
+Status: active detailed planning for the Discord bot MVP. These domain roadmaps
+expand the current execution and discussion queues above; they are not legacy or
+deferred work.
 
 ---
 
@@ -330,10 +317,28 @@ a developer's local machine.
 
 ## Superseded and Deferred Legacy Scope
 
+Status: deferred. The content below is preserved from the earlier web/OCR/meeting
+roadmap and is not part of the current MVP execution queue or active domain
+roadmaps.
+
+Re-entry rule: move one legacy item into the current queue only when a future
+issue names the domain, explains why Discord bot MVP needs it now, and includes
+targeted validation.
+
 These items came from the earlier OCR, meeting transcript, and web frontend
 roadmap. They are preserved here so the old roadmap is not lost, but they are
 not active MVP work unless a future issue explicitly moves them back into the
 domain roadmap above.
+
+### Legacy Boundary Notes
+
+- The former `Immediate First Steps` queue repeated the same command inventory,
+  runtime scaffold, channel enforcement, smoke command, and first-domain-command
+  tasks that now live in `Current Execution Queue`.
+- Those repeated items were removed from the legacy section. They should be
+  tracked only once, in the active queue above.
+- Legacy content starts in this section and keeps explicit re-entry conditions
+  for deferred work.
 
 ### Superseded by Discord Bot MVP
 
