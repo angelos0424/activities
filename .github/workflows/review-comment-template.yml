@@ -1,0 +1,126 @@
+name: Review Comment Task Template
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  expand-review-comment:
+    name: Expand /review comment into @Task review comment
+    if: >-
+      ${{
+        github.event.comment.user.type != 'Bot' &&
+        startsWith(github.event.comment.body, '/review comment')
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post Symphony @Task review comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          python3 <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+          import tempfile
+          from pathlib import Path
+
+          repo = os.environ["REPO"]
+          issue_number = os.environ["ISSUE_NUMBER"]
+          command_body = os.environ["COMMENT_BODY"].strip()
+
+          def gh(*args: str) -> str:
+              return subprocess.check_output(["gh", *args], text=True).strip()
+
+          def post_issue_comment(body: str) -> None:
+              with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as f:
+                  f.write(body)
+                  path = f.name
+              try:
+                  subprocess.check_call([
+                      "gh", "issue", "comment", issue_number,
+                      "-R", repo,
+                      "--body-file", path,
+                  ])
+              finally:
+                  Path(path).unlink(missing_ok=True)
+
+          match = re.match(r"^/review\s+comment\b(?P<args>[\s\S]*)$", command_body)
+          if not match:
+              sys.exit(0)
+
+          args = match.group("args").strip()
+
+          extra = ""
+          comment_match = re.search(r"(?:^|\s)comment:(?P<comment>[\s\S]*)$", args)
+          if comment_match:
+              extra = comment_match.group("comment").strip()
+              args_for_tokens = args[:comment_match.start()].strip()
+          else:
+              args_for_tokens = args
+
+          pr_match = re.search(r"(?:^|\s)pr:(?P<pr>\d+)\b", args_for_tokens)
+          if not pr_match:
+              post_issue_comment(
+                  "`/review comment` 사용법:\n\n"
+                  "```text\n"
+                  "/review comment pr:45 comment:추가 지시\n"
+                  "```\n\n"
+                  "`pr:<번호>`는 필수입니다."
+              )
+              sys.exit(0)
+
+          pr_number = pr_match.group("pr")
+
+          try:
+              pr_json = gh(
+                  "pr", "view", pr_number,
+                  "-R", repo,
+                  "--json", "url,headRefName",
+              )
+              pr = json.loads(pr_json)
+          except subprocess.CalledProcessError as exc:
+              post_issue_comment(
+                  f"PR #{pr_number} 정보를 조회하지 못했습니다. "
+                  f"repo `{repo}`에서 PR 번호를 확인해주세요."
+              )
+              raise exc
+
+          pr_url = pr["url"]
+          pr_branch = pr["headRefName"]
+
+          body = "\n".join([
+              "@Task review comment",
+              "",
+              f"Target-PR: {pr_number}",
+              f"Target-Branch: {pr_branch}",
+              f"Existing PR: {pr_url}",
+              "",
+              "리뷰 코멘트 중 아직 반영되지 않은 항목만 수정해줘.",
+              "기존 PR 브랜치에 커밋하고 push해줘.",
+              "새 PR은 만들지 마.",
+          ])
+
+          if extra:
+              body += f"\n\n추가 지시:\n{extra}"
+
+          body += "\n\n" + "\n".join([
+              "완료 후 다음을 요약해줘:",
+              "- 반영한 리뷰 코멘트",
+              "- 수정한 파일",
+              "- 실행한 검증",
+              "- 남은 blocker",
+          ])
+
+          post_issue_comment(body)
+          PY
