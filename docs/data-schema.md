@@ -151,7 +151,7 @@ data/receipts/{yyyy}/{MM}/{HHMMSS}/{fileid}
 1. `yyyy`, `MM`, `HHMMSS`는 영수증 upload 시간을 기준으로 한다.
 2. `fileid`는 bot이 생성하며, 사용자가 올린 원본 파일명을 포함하면 안 된다.
 3. 사용자의 원본 파일명은 metadata로만 저장한다.
-4. Sheets에 기록하는 경로는 project data directory 기준 상대 경로로 둔다.
+4. Sheets에 기록하는 경로는 project root 기준 상대 경로로 둔다.
 5. MVP에서는 로컬 PC filesystem 접근을 접근 모델로 본다. 해당 PC/user account에 접근할 수 있는 사람은 파일에 접근할 수 있다.
 6. 로컬 filesystem 경로는 나중에 Google Drive로 sync 또는 migration할 수 있도록 단순하게 유지한다.
 
