@@ -1,7 +1,7 @@
-# SNS Service
+# Activities Discord Bot
 
-Skeleton workspace for the SNS Discord bot migration.
+Skeleton workspace for the local Activities Discord bot migration.
 
-This service owns Discord bot entry points, SNS-related domains, external integrations,
-and shared utilities used by the SNS bot. Functional bot behavior is intentionally out
-of scope for this skeleton.
+This workspace owns Discord bot entry points, `sns-manager`/`receipt-manager`/`todo-manager`
+domains, external integrations, and shared utilities used by the local bot. Functional bot behavior
+is intentionally out of scope for this skeleton.

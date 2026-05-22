@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for the current SNS MVP.
+Accepted for the current local Discord bot MVP.
 
 ## Context
 
@@ -11,7 +11,7 @@ receipt uploads, OCR extraction, meeting transcript analysis/search, and report
 screens. That plan is still useful history, but it is too broad for the current
 execution queue.
 
-The current SNS MVP needs the cheapest useful automation path first: a Discord
+The current local Discord bot MVP needs the cheapest useful automation path first: a Discord
 bot used through slash commands in configured channels.
 
 ## Decision

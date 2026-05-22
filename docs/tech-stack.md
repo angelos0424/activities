@@ -10,9 +10,9 @@
 
 | 채널 | 서비스 |
 | --- | --- |
-| `#sns` | SNS 업로드 |
-| `#receipt` | 영수증 및 송금 상태 |
-| `#todo` | Todo 및 일정 관리 |
+| `#sns` | `sns-manager` |
+| `#receipt` | `receipt-manager` |
+| `#todo` | `todo-manager` |
 
 ## MVP 스택
 
@@ -82,9 +82,9 @@ SQLite를 포함하는 이유는 현재 Discord bot MVP가 local-first이기 때
 
 규칙:
 
-1. Google Sheets read/write, 로컬 파일 저장, SNS 업로드, Discord 메시지 update는 2~3번 재시도할 수 있다.
+1. Google Sheets read/write, 로컬 파일 저장, `sns-manager` 업로드, Discord 메시지 update는 2~3번 재시도할 수 있다.
 2. 최종 실패하면 bot은 사용자가 이해할 수 있는 안내 메시지를 반환하고 flow를 종료한다.
-3. 재시도는 idempotent해야 한다. 같은 Sheets row, 로컬 파일, SNS post를 중복 생성하면 안 된다.
+3. 재시도는 idempotent해야 한다. 같은 Sheets row, 로컬 파일, `sns-manager` post를 중복 생성하면 안 된다.
 4. 내부 오류는 SQLite `command_audit_log`에 기록한다.
 5. Discord 응답에는 token, credential, stack trace, 로컬 absolute path를 노출하지 않는다.
 
@@ -123,6 +123,6 @@ RECEIPT_STORAGE_DIR=/app/data/receipts
 ## 미결정 사항
 
 1. 장기적으로 서비스 데이터를 Google Sheets/SQLite에서 PostgreSQL로 옮길 것인가?
-2. SNS 업로드 asset도 영수증과 같은 filesystem pattern을 쓸 것인가?
+2. `sns-manager` asset도 영수증과 같은 filesystem pattern을 쓸 것인가?
 3. 로컬 filesystem을 먼저 Google Drive로 sync할 것인가, 아니면 Google Drive storage adapter로 교체할 것인가?
-4. Todo는 긴 목록과 지도 중심 flow 때문에 web/mobile companion UI가 필요한가?
+4. `todo-manager`는 긴 목록과 지도 중심 flow 때문에 web/mobile companion UI가 필요한가?

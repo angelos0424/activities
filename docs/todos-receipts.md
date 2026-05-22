@@ -1,4 +1,4 @@
-# TODO: 영수증 서비스
+# TODO: `receipt-manager` 서비스
 
 관련 PRD: `docs/prd-receipts.md`
 

@@ -41,12 +41,12 @@ Bot 명령어로 변경되는 runtime config를 저장한다.
 
 | Key | 메모 |
 | --- | --- |
-| `receipt.people_sheet_url` | People Sheet URL 또는 ID |
-| `receipt.transfers_sheet_url` | Transfers Sheet URL 또는 ID |
-| `receipt.storage_dir` | 기본값: `data/receipts` |
-| `receipt.admin_role_id` | Sheet config를 변경할 수 있는 Discord role |
-| `sns.homepage_target` | Homepage adapter config placeholder |
-| `todo.storage_mode` | 초기값은 `sqlite` 또는 `sheets` |
+| `receipt-manager.people_sheet_url` | People Sheet URL 또는 ID |
+| `receipt-manager.transfers_sheet_url` | Transfers Sheet URL 또는 ID |
+| `receipt-manager.storage_dir` | 기본값: `data/receipts` |
+| `receipt-manager.admin_role_id` | Sheet config를 변경할 수 있는 Discord role |
+| `sns-manager.homepage_target` | Homepage adapter config placeholder |
+| `todo-manager.storage_mode` | 초기값은 `sqlite` 또는 `sheets` |
 
 ### `local_files`
 
@@ -55,7 +55,7 @@ Bot 명령어로 변경되는 runtime config를 저장한다.
 | Column | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
 | id | text | yes | Generated id |
-| service | text | yes | `receipt`, `sns`, `todo` |
+| service | text | yes | `receipt-manager`, `sns-manager`, `todo-manager` |
 | local_path | text | yes | `data/` 아래 상대 경로 |
 | original_filename | text | no | Discord attachment 원본 파일명 |
 | mime_type | text | yes | Attachment MIME type |
@@ -72,7 +72,7 @@ Bot 명령어로 변경되는 runtime config를 저장한다.
 | Column | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
 | id | text | yes | Generated id |
-| service | text | yes | `sns`, `receipt`, `todo` |
+| service | text | yes | `sns-manager`, `receipt-manager`, `todo-manager` |
 | command | text | yes | Slash command name |
 | discord_guild_id | text | yes | Discord server id |
 | discord_channel_id | text | yes | Discord channel id |
@@ -85,7 +85,7 @@ Bot 명령어로 변경되는 runtime config를 저장한다.
 
 ### `sns_posts`
 
-SNS 업로드 요청을 추적한다.
+`sns-manager` 요청을 추적한다.
 
 | Column | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
@@ -117,7 +117,7 @@ Target별 업로드 상태를 추적한다.
 
 ### `todo_items`
 
-Todo는 discovery 결과가 Google Sheets 쪽으로 기울지 않으면 초기 저장소로 SQLite를 쓸 수 있다.
+`todo-manager`는 discovery 결과가 Google Sheets 쪽으로 기울지 않으면 초기 저장소로 SQLite를 쓸 수 있다.
 
 | Column | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
@@ -195,5 +195,5 @@ data/receipts/{yyyy}/{MM}/{HHMMSS}/{fileid}
 | Google Sheets read | yes | 재시도해도 안전 |
 | Google Sheets append | yes | generated id로 논리적 중복 row 방지 |
 | 로컬 파일 저장 | yes | 같은 fileid를 재사용하고 retry마다 새 파일명을 만들지 않음 |
-| SNS 업로드 | yes | target별 재시도. 이미 성공한 target은 다시 업로드하지 않음 |
+| `sns-manager` | yes | target별 재시도. 이미 성공한 target은 다시 업로드하지 않음 |
 | Discord 응답 update | yes | update 실패 시 로컬에 기록하고 종료 |

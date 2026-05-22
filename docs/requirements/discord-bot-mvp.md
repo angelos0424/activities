@@ -2,7 +2,7 @@
 
 ## 목적
 
-SNS 서비스를 포함한 Activities Discord bot MVP의 최소 요구사항을 정의한다. MVP는 사용자가 설정된 Discord 채널에서 slash command, modal form, file attachment로 운영 workflow를 실행할 수 있게 한다.
+`sns-manager`를 포함한 Activities Discord bot MVP의 최소 요구사항을 정의한다. MVP는 사용자가 설정된 Discord 채널에서 slash command, modal form, file attachment로 운영 workflow를 실행할 수 있게 한다.
 
 이 문서는 구현 대상으로 확정된 항목과, 구현 전에 제품/기술 결정을 더 해야 하는 항목을 분리한다.
 
@@ -28,7 +28,7 @@ SNS 서비스를 포함한 Activities Discord bot MVP의 최소 요구사항을 
 | Mobile app packaging | Discord가 첫 client surface다. |
 | Multi-tenant admin console | MVP 검증에는 설정된 guild/channel ID로 충분하다. |
 | 전체 승인 workflow | 먼저 intake와 status tracking을 검증하고, approval state machine은 이후 추가한다. |
-| 확인 없는 직접 게시 | SNS publish는 실제 계정 write 전에 승인 결정을 먼저 해야 안전하다. |
+| 확인 없는 직접 게시 | `sns-manager` publish는 실제 계정 write 전에 승인 결정을 먼저 해야 안전하다. |
 
 ## 상위 Flow
 
@@ -43,7 +43,7 @@ Discord bot runtime
   v
 Domain handler
   |
-  | SNS upload | receipt/remittance | todo/schedule
+  | sns-manager | receipt-manager | todo-manager
   v
 Storage 또는 integration boundary
   |
@@ -54,13 +54,13 @@ Discord 응답
 
 ## Domain 요구사항
 
-### SNS 업로드
+### `sns-manager`
 
 #### 구현 확정 항목
 
 | ID | 요구사항 | 우선순위 |
 | --- | --- | --- |
-| SNS-001 | `/sns-upload`, `/sns-draft`, 또는 확정된 `/post` 같은 SNS content intake command를 제공한다. | P0 |
+| SNS-001 | `/sns-upload`, `/sns-draft`, 또는 확정된 `/post` 같은 `sns-manager` content intake command를 제공한다. | P0 |
 | SNS-002 | title/topic/body와 target platform/channel에 필요한 text field를 받는다. | P0 |
 | SNS-003 | Discord가 제공하는 경우 optional image/media attachment metadata를 지원한다. | P1 |
 | SNS-004 | 필수 content, 최대 길이, target platform, attachment presence/type을 처리 전 검증한다. | P0 |
@@ -76,9 +76,9 @@ Discord 응답
 | Publish 방식 | MVP가 draft 생성에서 멈출지, 승인된 live publishing까지 포함할지 결정 |
 | 승인 담당자 | live publishing이 범위에 들어오면 누가 승인할 수 있는지 결정 |
 | Brand rule | 톤, 금지어, hashtag rule, media requirement가 MVP에 필요한지 결정 |
-| 저장소 | SNS draft가 PostgreSQL, Google Sheets, 또는 다른 system of record에 저장될지 결정 |
+| 저장소 | `sns-manager` draft가 PostgreSQL, Google Sheets, 또는 다른 system of record에 저장될지 결정 |
 
-### 영수증 및 송금 이력
+### `receipt-manager`
 
 #### 구현 확정 항목
 
@@ -104,7 +104,7 @@ Discord 응답
 | 권한 | 누가 영수증을 제출하고, 누가 paid/rejected 처리할 수 있는지 결정 |
 | 알림 | 지급/미지급 reminder가 같은 채널, private channel, DM 중 어디로 갈지 결정 |
 
-### Todo 및 일정 관리
+### `todo-manager`
 
 #### 구현 확정 항목
 
@@ -123,7 +123,7 @@ Discord 응답
 
 | 주제 | 필요한 결정 |
 | --- | --- |
-| Todo와 schedule 분리 | scheduled item을 todo subtype으로 둘지, 별도 calendar-like record로 둘지 결정 |
+| `todo-manager` 내부 task/schedule 분리 | scheduled item을 task subtype으로 둘지, 별도 calendar-like record로 둘지 결정 |
 | 외부 sync | Google Calendar, Google Sheets, 다른 task system과 sync할지, 외부 sync 없이 시작할지 결정 |
 | Status model | MVP가 `open`/`done`만 쓸지 `blocked`, `cancelled`, `overdue`를 포함할지 결정 |
 | Assignee mapping | Discord user를 assignee로 직접 쓸지, 별도 user profile table이 필요한지 결정 |
@@ -143,7 +143,7 @@ Discord 응답
 ### Modal과 Form
 
 - 여러 text field나 긴 free-form text가 필요하면 modal을 사용한다.
-- Modal은 SNS draft text, receipt memo/details, 긴 todo description에 적합하다.
+- Modal은 `sns-manager` draft text, `receipt-manager` memo/details, 긴 `todo-manager` description에 적합하다.
 - Modal은 attachment upload를 대체하지 않는다. 파일이 필요한 flow는 attachment-aware entry point와 명확한 안내가 필요하다.
 - Modal submission도 slash command input과 같은 방식으로 검증한다.
 - Modal field label과 error message는 별도 language policy가 없으면 한국어를 기본으로 한다.
@@ -179,7 +179,7 @@ Raw file content나 민감한 영수증 data를 log에 남기지 않는다.
 
 ## 인수 조건
 
-1. MVP command inventory가 SNS upload, receipt/remittance history, todo/schedule management를 포함한다.
+1. MVP command inventory가 `sns-manager`, `receipt-manager`, `todo-manager`를 포함한다.
 2. Domain별로 구현 확정 항목과 결정 필요 항목이 분리되어 있다.
 3. Discord slash command, modal/form, attachment 제약이 문서화되어 있다.
 4. 미결정 사항이 follow-up issue로 바꿀 수 있을 만큼 명확하다.

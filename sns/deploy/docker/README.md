@@ -1,6 +1,6 @@
-# SNS Docker Compose
+# Activities Docker Compose
 
-Docker Compose skeleton for the SNS Discord bot service.
+Docker Compose skeleton for the local Activities Discord bot service.
 
 This MVP setup intentionally defines only the `bot` service. A database container is
 not included because the first storage target is Google Sheets.

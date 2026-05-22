@@ -1,8 +1,8 @@
-# TODO: SNS 업로드 서비스
+# TODO: `sns-manager` 서비스
 
 관련 PRD: `docs/prd-sns.md`
 
-목표: `#sns`에서 Discord 기반 SNS 업로드 product slice를 만든다.
+목표: `#sns`에서 Discord 기반 `sns-manager` product slice를 만든다.
 
 ## 사용자 조사
 

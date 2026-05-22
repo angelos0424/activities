@@ -1,14 +1,14 @@
-# PRD: SNS 업로드 서비스
+# PRD: `sns-manager` 서비스
 
 ## 1. 요약
 
-SNS 업로드 서비스는 Discord `#sns` 채널에서 `/post` 명령어로 시작한다. 사용자는 form 형태로 업로드 채널, 홈페이지 분류, 제목, 내용, 이미지/영상 파일을 입력하고, bot은 Instagram, Facebook, 홈페이지에 업로드하거나 업로드 준비물을 만든다.
+`sns-manager` 서비스는 Discord `#sns` 채널에서 `/post` 명령어로 시작한다. 사용자는 form 형태로 업로드 채널, 홈페이지 분류, 제목, 내용, 이미지/영상 파일을 입력하고, bot은 Instagram, Facebook, 홈페이지에 업로드하거나 업로드 준비물을 만든다.
 
 MVP의 핵심은 "여러 채널에 올라가야 하는 공지/갤러리 게시물이 누락되지 않게 하고, 결과 URL을 한곳에 남기는 것"이다.
 
 ## 2. 목표
 
-1. 사용자가 Discord `#sns` 채널에서 `/post`로 SNS 업로드 작업을 시작한다.
+1. 사용자가 Discord `#sns` 채널에서 `/post`로 `sns-manager` 작업을 시작한다.
 2. 사용자가 업로드 채널을 선택한다: Instagram, Facebook, Homepage.
 3. 홈페이지 업로드 시 공지/갤러리 중 하나를 선택한다.
 4. 사용자가 title, content, 이미지/영상 파일을 제출한다.
@@ -171,7 +171,7 @@ MVP 대체 flow:
 
 ## 12. 인수 조건
 
-1. `/post`가 `#sns`에서 SNS 업로드 flow를 시작한다.
+1. `/post`가 `#sns`에서 `sns-manager` flow를 시작한다.
 2. 사용자는 Instagram, Facebook, Homepage를 한 번에 선택할 수 있다.
 3. 사용자는 홈페이지 업로드용 notice/gallery를 선택할 수 있다.
 4. 사용자는 title, content, multiple image/mp4 attachment를 제출할 수 있다.

@@ -9,9 +9,9 @@ Discord bot이 slash command, modal/form, 파일 입력을 처리하는 MVP다.
 
 | 서비스 | PRD | 기본 사용 위치 |
 | --- | --- | --- |
-| SNS 업로드 | `docs/prd-sns.md` | Discord `#sns` 채널 |
-| 영수증 | `docs/prd-receipts.md` | 로컬 Discord bot + 로컬 파일 저장소 + Google Sheets |
-| Todo | `docs/prd-todo.md` | Discord `#todo` 채널 |
+| `sns-manager` | `docs/prd-sns.md` | Discord `#sns` 채널 |
+| `receipt-manager` | `docs/prd-receipts.md` | 로컬 Discord bot + 로컬 파일 저장소 + Google Sheets |
+| `todo-manager` | `docs/prd-todo.md` | Discord `#todo` 채널 |
 
 ## 공통 구현 문서
 
@@ -34,7 +34,7 @@ Discord bot이 slash command, modal/form, 파일 입력을 처리하는 MVP다.
 ## 공통 원칙
 
 1. 하나의 Discord 서버에서 서비스별 채널을 나누어 운영한다.
-2. SNS는 `#sns`, 영수증은 `#receipt`, Todo는 `#todo` 채널을 기본 운영 공간으로 둔다.
+2. `sns-manager`는 `#sns`, `receipt-manager`는 `#receipt`, `todo-manager`는 `#todo` 채널을 기본 운영 공간으로 둔다.
 3. 로컬에 설치한 Discord bot이 세 서비스의 slash command와 파일 입력을 처리한다.
 4. MVP bot stack은 `docs/tech-stack.md`를 따른다.
 5. Google Sheets는 초기 운영 기록과 행정 담당자 협업을 위한 저장소로 둔다.
@@ -47,20 +47,20 @@ Discord bot이 slash command, modal/form, 파일 입력을 처리하는 MVP다.
 
 | 채널 | 서비스 | 주요 명령어 |
 | --- | --- | --- |
-| `#sns` | SNS 업로드 | `/post` |
-| `#receipt` | 영수증 | `/receipt add`, `/receipt check`, `/receipt sheet status`, `/receipt sheet set` |
-| `#todo` | Todo | `/todo add`, `/todo list`, `/todo status` |
+| `#sns` | `sns-manager` | `/post` |
+| `#receipt` | `receipt-manager` | `/receipt add`, `/receipt check`, `/receipt sheet status`, `/receipt sheet set` |
+| `#todo` | `todo-manager` | `/todo add`, `/todo list`, `/todo status` |
 
 ## MVP 우선순위
 
 1. 공통 로컬 bot 기반: Discord command 등록, 채널 검증, SQLite 설정, 재시도 처리.
-2. 영수증: 로컬 Discord bot으로 영수증 사진을 저장하고, 송금 대기 상태를 Google Sheets에 남기며 `/receipt check`로 미완료 건수를 확인한다.
-3. SNS 업로드: `#sns`에서 `/post`로 입력 수집과 결과 추적을 시작한다.
-4. Todo: `#todo`에서 시작하되, 사용자 요구사항 확인 후 최소 명령어부터 구현한다.
+2. `receipt-manager`: 로컬 Discord bot으로 영수증 사진을 저장하고, 송금 대기 상태를 Google Sheets에 남기며 `/receipt check`로 미완료 건수를 확인한다.
+3. `sns-manager`: `#sns`에서 `/post`로 입력 수집과 결과 추적을 시작한다.
+4. `todo-manager`: `#todo`에서 시작하되, 사용자 요구사항 확인 후 최소 명령어부터 구현한다.
 
 ## 공통 미결정 사항
 
 1. 홈페이지 게시 API 또는 관리자 업로드 방식은 무엇인가?
 2. Instagram/Facebook 자동 업로드는 Meta 권한 심사를 통과해야 하는가, 아니면 초기에는 수동 업로드 보조로 둘 것인가?
 3. Google Sheets가 장기 source of truth인지, 임시 운영 장부인지 결정해야 한다.
-4. Todo에서 Discord 명령만으로 충분한가, 아니면 지도/긴 리스트 때문에 보조 web/mobile UI가 필요한가?
+4. `todo-manager`에서 Discord 명령만으로 충분한가, 아니면 지도/긴 리스트 때문에 보조 web/mobile UI가 필요한가?

@@ -18,9 +18,9 @@ unless a future issue explicitly moves them back into scope.
 
 | Service | PRD | TODO |
 | --- | --- | --- |
-| SNS 업로드 | `docs/prd-sns.md` | `docs/todos-sns.md` |
-| 영수증 | `docs/prd-receipts.md` | `docs/todos-receipts.md` |
-| Todo | `docs/prd-todo.md` | `docs/todos-todo.md` |
+| `sns-manager` | `docs/prd-sns.md` | `docs/todos-sns.md` |
+| `receipt-manager` | `docs/prd-receipts.md` | `docs/todos-receipts.md` |
+| `todo-manager` | `docs/prd-todo.md` | `docs/todos-todo.md` |
 
 ## Shared Planning Docs
 
@@ -37,9 +37,9 @@ The MVP is a Docker Compose-managed local Discord bot for one Discord server.
 
 Services:
 
-1. SNS upload in `#sns`.
-2. Receipt and transfer tracking in `#receipt`.
-3. Todo and schedule management in `#todo`.
+1. `sns-manager` in `#sns`.
+2. `receipt-manager` in `#receipt`.
+3. `todo-manager` in `#todo`.
 
 ## Phase 0: Product and Implementation Spec
 
@@ -69,7 +69,7 @@ Goal: one working bot process that can receive commands in the correct channels.
 - [ ] Add shared retry helper for 2 to 3 retries and final user-facing failure.
 - [ ] Add channel validation for `#sns`, `#receipt`, and `#todo`.
 
-## Phase 2: Receipt MVP
+## Phase 2: `receipt-manager` MVP
 
 Goal: reduce the highest-risk repetitive admin work first.
 
@@ -83,19 +83,19 @@ Goal: reduce the highest-risk repetitive admin work first.
 - [ ] Implement `/receipt check`.
 - [ ] Test upload, bot restart, and Google Sheets failure cases.
 
-## Phase 3: SNS MVP
+## Phase 3: `sns-manager` MVP
 
 Goal: make cross-channel posting trackable even if some targets stay manual.
 
 - [ ] Implement `/post` command input flow.
 - [ ] Implement asset collection from Discord messages or modal file upload.
-- [ ] Store SNS post request and targets.
+- [ ] Store `sns-manager` post request and targets.
 - [ ] Implement homepage upload or manual upload packet.
 - [ ] Implement Instagram/Facebook feasibility path.
 - [ ] Return per-target result URL or manual action.
 - [ ] Implement retry for failed targets only.
 
-## Phase 4: Todo Prototype
+## Phase 4: `todo-manager` Prototype
 
 Goal: validate whether Discord-based todo is simpler than the current calendar workflow.
 

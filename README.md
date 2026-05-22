@@ -14,9 +14,9 @@ The active service channels are:
 
 | Channel | Service |
 | --- | --- |
-| `#sns` | SNS upload |
-| `#receipt` | Receipt and transfer status |
-| `#todo` | Todo and schedule management |
+| `#sns` | `sns-manager` |
+| `#receipt` | `receipt-manager` |
+| `#todo` | `todo-manager` |
 
 The earlier web app, OCR-first receipt flow, meeting transcript analysis, and
 browser report screens are deferred unless a future issue explicitly

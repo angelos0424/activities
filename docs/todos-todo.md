@@ -1,8 +1,8 @@
-# TODO: Todo 및 일정 서비스
+# TODO: `todo-manager` 서비스
 
 관련 PRD: `docs/prd-todo.md`
 
-목표: `#todo`에서 Discord 기반 Todo flow를 정의하고 검증한다.
+목표: `#todo`에서 Discord 기반 `todo-manager` flow를 정의하고 검증한다.
 
 ## 사용자 조사
 
@@ -55,8 +55,8 @@
 
 ## 엔지니어링 계획
 
-- [ ] Todo가 영수증 서비스의 사람/단체 data를 공유할지 결정한다.
-- [ ] Todo가 Discord-only로 시작할지, Discord + Sheet prototype으로 시작할지 결정한다.
+- [ ] `todo-manager`가 `receipt-manager` 서비스의 사람/단체 data를 공유할지 결정한다.
+- [ ] `todo-manager`가 Discord-only로 시작할지, Discord + Sheet prototype으로 시작할지 결정한다.
 - [ ] MVP 지도 integration이 deep link만으로 충분한지 결정한다.
 - [ ] 이동 시간 pain이 검증되기 전까지 Naver Directions API는 보류한다.
 

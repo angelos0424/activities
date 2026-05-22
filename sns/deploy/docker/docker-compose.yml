@@ -1,4 +1,4 @@
-name: sns-discord-bot
+name: activities-discord-bot
 
 services:
   bot:
@@ -13,7 +13,7 @@ services:
       - sh
       - -c
       - |
-        echo "SNS Discord bot Compose skeleton is ready."
+        echo "Activities Discord bot Compose skeleton is ready."
         echo "Replace this placeholder with the bot runtime command when implementation lands."
         sleep infinity
     restart: unless-stopped
