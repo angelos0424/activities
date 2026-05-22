@@ -304,53 +304,371 @@ a developer's local machine.
 ## Superseded and Deferred Legacy Scope
 
 These items came from the earlier OCR, meeting transcript, and web frontend
-roadmap. They are not active MVP work unless a future issue explicitly moves
-them back into the domain roadmap above.
+roadmap. They are preserved here so the old roadmap is not lost, but they are
+not active MVP work unless a future issue explicitly moves them back into the
+domain roadmap above.
 
 ### Superseded by Discord Bot MVP
 
-- [ ] React/Vite client as the primary user interface.
-  - Reason: the current MVP is operated through Discord slash commands.
+These legacy client tasks are superseded because the current MVP user surface is
+Discord slash commands, not a browser or mobile app.
 
-- [ ] Browser-based receipt image upload screen.
-  - Reason: receipt intake should start from Discord command/attachment flow.
-
-- [ ] Browser-based meeting TXT upload screen.
-  - Reason: meeting upload is not part of the active domain list for this MVP.
-
-- [ ] Meeting list, detail, search, and report frontend pages.
-  - Reason: web meeting review is outside the Discord bot MVP.
-
-- [ ] Android or mobile packaging path.
-  - Reason: the active client surface is Discord, not a mobile app shell.
-
-### Deferred Until a Domain Reintroduces Them
-
-- [ ] OCR provider implementation for receipt extraction.
-  - Re-entry condition: Receipts domain decides OCR is required for MVP or a
-    later milestone.
-
-- [ ] Receipt expense database schema from the old accounting backend plan.
-  - Re-entry condition: Receipts domain chooses PostgreSQL as the system of
-    record instead of or alongside Google Sheets.
-
-- [ ] Scheduled unpaid receipt email notifications.
-  - Re-entry condition: Receipts domain defines payment states, recipients, and
-    notification policy.
-
-- [ ] Meeting transcript ingestion, chunking, embeddings, search, and reports.
-  - Re-entry condition: Meeting automation becomes an explicit domain again.
-
-- [ ] AI meeting summary, decision, and action-item extraction.
-  - Re-entry condition: Meeting automation or Todo domain explicitly needs
-    transcript-derived tasks.
-
-- [ ] OpenAI, Google Vision, or other external AI provider integration.
-  - Re-entry condition: a domain command has a committed provider contract,
-    credential policy, and eval/test plan.
-
-- [ ] Full web frontend integration validation.
+- [ ] Create a small frontend API layer.
+  - Legacy files:
+    - `frontend/src/lib/api.ts`
+    - `frontend/src/lib/types.ts`
+  - Legacy functions:
+    - `uploadReceiptImage(file)`
+    - `uploadMeetingTxt(file)`
+    - `listMeetings()`
+    - `getMeeting(id)`
+    - `searchMeetings(query)`
+    - `getMeetingReport(id)`
   - Re-entry condition: web UI becomes an active product surface again.
+
+- [ ] Split `frontend/src/App.tsx` into focused components.
+  - Legacy suggested files:
+    - `frontend/src/components/AppShell.tsx`
+    - `frontend/src/features/accounting/ReceiptUploadCard.tsx`
+    - `frontend/src/features/meetings/MeetingUploadButton.tsx`
+    - `frontend/src/features/meetings/MeetingList.tsx`
+    - `frontend/src/features/meetings/MeetingDetail.tsx`
+    - `frontend/src/features/meetings/MeetingSearch.tsx`
+    - `frontend/src/features/meetings/MeetingReport.tsx`
+  - Re-entry condition: web UI becomes an active product surface again.
+
+- [ ] Wire the receipt image input to the backend upload endpoint.
+  - Accept image files only.
+  - Show selected file name, upload progress/pending state, success state, and
+    error state.
+  - Disable duplicate submit while upload is pending.
+  - Re-entry condition: receipt intake moves back to browser upload instead of
+    Discord attachment flow.
+
+- [ ] Add a minimal OCR result preview panel.
+  - Display merchant/vendor, transaction date, total amount, currency, and
+    processing status if returned by the API.
+  - If OCR is async, display the returned job/expense status.
+  - Re-entry condition: web UI becomes an active product surface and Receipts
+    domain chooses OCR-backed extraction.
+
+- [ ] Wire the `.txt` meeting upload input to the backend upload endpoint.
+  - Accept `.txt,text/plain` only.
+  - Show upload/processing status.
+  - Refresh the meeting list after successful upload.
+  - Re-entry condition: Meeting automation becomes an explicit active domain.
+
+- [ ] Replace hard-coded meeting data with `GET /api/meetings`.
+  - Show title, meeting date, status, and summary/analysis status.
+  - Include loading, empty, and error states.
+  - Re-entry condition: Meeting automation becomes an explicit active domain
+    with a web UI.
+
+- [ ] Add meeting detail rendering.
+  - Show raw/cleaned transcript summary, decisions, action item candidates, and
+    metadata.
+  - Keep the MVP simple: either inline selected card detail or a lightweight
+    route/state-based detail view.
+  - Re-entry condition: Meeting automation becomes an explicit active domain
+    with a web UI.
+
+- [ ] Add meeting search.
+  - Query backend search endpoint.
+  - Render related meeting, chunk content, speaker name, timestamp range, and
+    decision/action item links when available.
+  - Re-entry condition: Meeting automation becomes an explicit active domain
+    with search requirements.
+
+- [ ] Add report view.
+  - Render print-friendly meeting report with title, date, summary, decisions,
+    action items, and source metadata.
+  - Add a `window.print()` button.
+  - Re-entry condition: Meeting automation becomes an explicit active domain
+    with report requirements.
+
+- [ ] Run legacy frontend validation.
+  - Run `cd frontend && npm install` if dependencies are missing.
+  - Run `cd frontend && npm run build`.
+  - Manually verify:
+    - Receipt image can be selected and submitted.
+    - TXT meeting file can be selected and submitted.
+    - Meeting list loads from API.
+    - Meeting detail and report states render without mock-only assumptions.
+  - Re-entry condition: web UI becomes an active product surface again.
+
+### Deferred: OCR Analysis and Expense Data Server
+
+These legacy accounting backend tasks are deferred until the Receipts domain
+chooses OCR, PostgreSQL accounting tables, or scheduled payment notification as
+active MVP behavior.
+
+- [ ] Add a Flyway migration for accounting tables.
+  - Legacy suggested file:
+    - `backend/src/main/resources/db/migration/V2__create_accounting_schema.sql`
+  - Legacy suggested schema/tables:
+    - `accounting.receipts`
+    - `accounting.expenses`
+    - `accounting.ocr_results`
+    - `accounting.notification_runs`
+  - Minimum expense fields until clarified:
+    - `id`
+    - `receipt_id`
+    - `vendor_name`
+    - `transaction_date`
+    - `total_amount`
+    - `currency`
+    - `payment_status` (`pending`, `approved`, `paid`, `rejected`)
+    - `memo`
+    - `created_at`, `updated_at`
+
+- [ ] Add indexes for unpaid expense lookup.
+  - `payment_status`
+  - `transaction_date`
+  - `created_at`
+
+- [ ] Create receipt upload DTOs.
+  - Legacy suggested package: `com.activities.accounting.dto`
+  - Legacy DTOs:
+    - `ReceiptUploadResponse`
+    - `ExpenseSummaryResponse`
+    - `OcrStatusResponse`
+
+- [ ] Create `ReceiptController`.
+  - Legacy suggested file:
+    - `backend/src/main/java/com/activities/accounting/ReceiptController.java`
+  - Legacy endpoint: `POST /api/accounting/receipts`
+  - Request: multipart file field `file`
+  - Validate:
+    - file is present
+    - content type starts with `image/`
+    - file size is within configured limit
+  - Response: receipt/expense id and processing status.
+
+- [ ] Create receipt service boundary.
+  - Legacy suggested files:
+    - `ReceiptService.java`
+    - `OcrProvider.java`
+    - `ExpenseParser.java`
+    - `ExpenseRepository.java` or JDBC-based DAO
+  - Keep provider interface separate so Google Vision can be swapped or mocked.
+
+- [ ] Implement a local/mock OCR provider first.
+  - Return deterministic extracted text for tests/dev when no external
+    credential is configured.
+  - This keeps MVP testable without secrets.
+
+- [ ] Add Google Vision-compatible provider boundary.
+  - Do not hard-code credentials.
+  - Read provider choice and credentials from environment/config.
+  - Keep actual external provider optional for MVP.
+
+- [ ] Implement expense field extraction from OCR text.
+  - Start with rule-based extraction for amount/date/vendor.
+  - Store raw OCR text for traceability.
+  - Mark uncertain fields as nullable rather than guessing.
+
+- [ ] Enable scheduling in the Spring Boot application.
+  - Add `@EnableScheduling`.
+
+- [ ] Implement unpaid expense query.
+  - Find `payment_status = 'pending'` or configured unpaid states.
+
+- [ ] Implement email provider boundary.
+  - Legacy suggested interface: `EmailProvider`.
+  - MVP providers:
+    - log-only provider for local development
+    - Resend-compatible provider for production later
+
+- [ ] Implement daily 17:00 notification job.
+  - Configurable cron expression.
+  - Record each run in `accounting.notification_runs`.
+
+- [ ] Run legacy accounting backend validation.
+  - Add controller/service tests for image upload validation.
+  - Add unit tests for OCR text parsing.
+  - Add scheduler/service test for unpaid expense selection.
+  - Run `cd backend && mvn test`.
+  - Verify DB migration with Docker PostgreSQL + Flyway.
+
+### Deferred: STT/TXT Meeting Upload and Analysis Server
+
+These legacy meeting backend tasks are deferred until meeting transcript
+automation becomes an explicit active domain again.
+
+- [ ] Define meeting DTOs.
+  - Legacy suggested package: `com.activities.meetings.dto`
+  - Legacy DTOs:
+    - `MeetingUploadResponse`
+    - `MeetingListItemResponse`
+    - `MeetingDetailResponse`
+    - `MeetingSearchResponse`
+    - `MeetingReportResponse`
+    - `DecisionResponse`
+    - `ActionItemResponse`
+    - `TranscriptChunkResponse`
+
+- [ ] Create `MeetingController`.
+  - Legacy suggested endpoints:
+    - `POST /api/meetings/uploads` for TXT multipart upload
+    - `GET /api/meetings` for list
+    - `GET /api/meetings/{id}` for detail
+    - `GET /api/meetings/search?q=` for search
+    - `GET /api/meetings/{id}/report` for report
+
+- [ ] Implement TXT upload validation.
+  - Accept `.txt` / `text/plain`.
+  - Reject empty files.
+  - Store original raw text in `meetings.transcripts.raw_text`.
+
+- [ ] Create meeting metadata on upload.
+  - Use file name as default title if no title metadata exists.
+  - Use current timestamp as default meeting date if not provided.
+  - Set processing status explicitly. If the existing `meetings.meetings.status`
+    is insufficient, add a dedicated analysis status column in a new migration.
+
+- [ ] Implement text cleanup.
+  - Normalize line endings.
+  - Trim repeated blank lines.
+  - Preserve speaker/timestamp lines where present.
+
+- [ ] Implement token estimation utility.
+  - MVP can use approximate Korean-friendly character/token heuristic.
+  - Store transcript and chunk token counts.
+
+- [ ] Implement chunking service.
+  - Target around 500 tokens per chunk with overlap.
+  - Preserve `chunk_index`.
+  - Parse optional speaker name and timestamp into `speaker_name`,
+    `started_at_seconds`, `ended_at_seconds` when available.
+
+- [ ] Create `EmbeddingProvider` interface.
+  - Methods should expose model name, provider name, dimensions, and embedding
+    generation.
+
+- [ ] Implement deterministic mock embedding provider for tests/local
+  development.
+  - Must return exactly 1536 dimensions to match `VECTOR(1536)`.
+
+- [ ] Add OpenAI-compatible provider boundary.
+  - Read API key from environment only.
+  - Do not require external provider for local tests.
+
+- [ ] Ensure active `embedding_configs` is used.
+  - Validate generated embedding dimension equals active config dimension before
+    insert.
+
+- [ ] Create `MeetingAnalysisProvider` interface.
+  - Inputs: cleaned transcript text and/or chunks.
+  - Outputs: summary, decisions, action item candidates.
+
+- [ ] Implement deterministic local/mock analyzer.
+  - Useful for tests and development without API keys.
+
+- [ ] Add LLM provider boundary for future external model integration.
+  - Keep provider optional/config-driven.
+
+- [ ] Implement repository/DAO layer for meeting tables.
+  - Tables already exist in `V1__create_meetings_schema.sql`:
+    - `meetings.meetings`
+    - `meetings.transcripts`
+    - `meetings.transcript_chunks`
+    - `meetings.action_items`
+    - `meetings.decisions`
+
+- [ ] Implement list endpoint.
+  - Return meeting id, title, date, status, short summary/status metadata.
+
+- [ ] Implement detail endpoint.
+  - Return metadata, transcript summary, decisions, action items, and optional
+    chunks.
+
+- [ ] Implement report endpoint.
+  - Return a print-friendly shape with meeting title/date, summary, decisions,
+    action items, and source notes.
+
+- [ ] Implement keyword search first.
+  - Search meeting title, transcript text, chunk content, decision content.
+
+- [ ] Implement vector search when embeddings exist.
+  - Generate query embedding using the active provider.
+  - Use pgvector cosine distance.
+  - Combine or clearly separate keyword and vector results.
+
+- [ ] Return source context.
+  - Meeting id/title.
+  - Chunk id/content.
+  - Speaker name and timestamp range when available.
+  - Linked decision/action item when applicable.
+
+- [ ] Run legacy meeting backend validation.
+  - Add controller tests for TXT upload validation.
+  - Add unit tests for cleanup, token estimation, and chunking.
+  - Add unit tests for mock embedding dimension enforcement.
+  - Add repository/integration test for list/detail/search if Testcontainers or
+    Docker DB is available.
+  - Run `cd backend && mvn test`.
+  - Verify Flyway migrations against `pgvector/pgvector:pg16`.
+
+### Deferred: Legacy Integration Validation
+
+These legacy end-to-end checks are deferred because they validate the old
+browser-plus-Spring flow, not the active Discord command flow.
+
+- [ ] Start PostgreSQL.
+  - Command: `docker compose up -d db`
+  - Verify healthcheck passes.
+
+- [ ] Start backend.
+  - Command: `cd backend && mvn spring-boot:run`
+  - Verify `GET /actuator/health` returns healthy status.
+
+- [ ] Start frontend.
+  - Command: `cd frontend && npm run dev`
+  - Verify the app loads in browser.
+
+- [ ] Run receipt upload smoke test.
+  - Upload an image file from the UI.
+  - Verify backend returns receipt/expense id.
+  - Verify expense row exists in DB.
+  - Verify UI shows processing/result state.
+
+- [ ] Run meeting TXT upload smoke test.
+  - Upload a sample `.txt` transcript.
+  - Verify meeting appears in list.
+  - Verify transcript, chunks, summary, decisions, and action items are stored.
+  - Verify detail page renders the stored data.
+
+- [ ] Run search smoke test.
+  - Search for a term from the uploaded transcript.
+  - Verify at least one relevant meeting/chunk result appears.
+
+- [ ] Run report smoke test.
+  - Open the meeting report view.
+  - Verify print layout includes title, date, summary, decisions, and action
+    items.
+
+- [ ] Run legacy build and quality gates.
+  - Run frontend build: `cd frontend && npm run build`
+  - Run backend tests: `cd backend && mvn test`
+  - Run repository hygiene check: `git diff --check`
+  - Update README with final run instructions once endpoints and flows are
+    implemented.
+
+### Deferred: Legacy Clarifications Before Full Implementation
+
+These questions do not block Discord bot scaffold work. They should be answered
+only if the matching deferred legacy scope is reactivated.
+
+- [ ] Confirm minimum accounting fields for OCR-derived expense data.
+- [ ] Confirm whether unpaid notification recipient is fixed by config or
+  editable in UI.
+- [ ] Confirm expected TXT transcript format, especially CLOVA Note
+  speaker/timestamp conventions.
+- [ ] Confirm whether browser print is enough for reports or server-generated
+  PDF is required.
+- [ ] Confirm whether action items should stay local or sync to a
+  kanban/external task system.
+- [ ] Decide when authentication becomes required before any public deployment.
 
 ## Validation Checklist for Roadmap Changes
 
