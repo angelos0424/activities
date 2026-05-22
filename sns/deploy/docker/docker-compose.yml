@@ -1,0 +1,19 @@
+name: sns-discord-bot
+
+services:
+  bot:
+    image: alpine:3.20
+    working_dir: /app
+    env_file:
+      - path: ../../.env
+        required: false
+    volumes:
+      - ../..:/app:ro
+    command:
+      - sh
+      - -c
+      - |
+        echo "SNS Discord bot Compose skeleton is ready."
+        echo "Replace this placeholder with the bot runtime command when implementation lands."
+        sleep infinity
+    restart: unless-stopped
