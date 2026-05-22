@@ -2,34 +2,40 @@
 
 Activities is currently scoped as an SNS 업무 자동화 Discord bot MVP.
 
-## Current MVP goal
+## Current MVP Goal
 
-The MVP goal is a 업무 자동화 bot used through slash commands in a specific Discord channel. The bot should let users trigger small automation workflows from Discord without opening a separate web application.
+The active MVP is a Discord bot operated through slash commands in configured
+Discord channels. The goal is to prove the cheapest useful workflow first:
+users should trigger small automation tasks from Discord without opening or
+maintaining a separate web application.
 
-Web UI and frontend work are out of scope for the current MVP and are deferred. Existing frontend/backend scaffold files remain in the repository as historical setup work, but they are not the active MVP target.
+The earlier web app, OCR-first receipt flow, meeting transcript analysis, and
+browser report screens are preserved as deferred legacy scope in `docs/prd.md`
+and `TODOS.md`. They are not part of the current execution queue unless a future
+issue explicitly reactivates them.
 
-## Existing scaffold
+## Existing Scaffold
 
 This repository is scaffolded for the stack reviewed from GitHub issue #4:
 
-- Frontend: React + Vite, currently deferred for this MVP
-- Mobile packaging path: Capacitor config, currently deferred for this MVP
-- Backend: Java Spring Boot REST API scaffold, retained for possible automation/API support
-- Data: PostgreSQL with pgvector, initialized through Flyway SQL migrations, retained for workflows that need persistence/search
-- Local infra: Docker Compose for the database, retained for local persistence support
+- Frontend: React + Vite, deferred for the current MVP
+- Mobile packaging path: Capacitor config, deferred for the current MVP
+- Backend: Java Spring Boot REST API scaffold, retained for automation/API support
+- Data: PostgreSQL with pgvector, retained for workflows that need persistence/search
+- Local infra: Docker Compose for the database
 - Product requirements: see `docs/prd.md`
 
 ## Project layout
 
 ```text
 .
-├── backend/                 # Spring Boot API scaffold
+├── backend/                 # Spring Boot API scaffold, retained for automation/API support
 ├── frontend/                # React/Vite client scaffold, deferred for current MVP
 ├── docs/                    # Review notes and architecture decisions
 └── docker-compose.yml       # Local PostgreSQL + pgvector
 ```
 
-## Existing scaffold local development
+## Existing Scaffold Local Development
 
 Start the database:
 
