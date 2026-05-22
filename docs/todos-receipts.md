@@ -1,39 +1,39 @@
-# TODO: Receipt Service
+# TODO: 영수증 서비스
 
-Related PRD: `docs/prd-receipts.md`
+관련 PRD: `docs/prd-receipts.md`
 
-Goal: Manage receipt submission and transfer status through a local Discord bot + Google Sheets.
+목표: 로컬 Discord bot + Google Sheets로 영수증 제출과 송금 상태를 관리한다.
 
-## Local Bot Setup
+## 로컬 Bot Setup
 
-- [x] Define local bot runtime.
+- [x] 로컬 bot 실행 환경을 정의한다.
   - Node.js + TypeScript.
   - `discord.js`.
   - Docker Compose.
-  - Source: `docs/tech-stack.md`.
+  - 출처: `docs/tech-stack.md`.
 
-- [ ] Define local receipt storage.
+- [ ] 로컬 영수증 저장 방식을 정의한다.
   - `data/receipts/{yyyy}/{MM}/{HHMMSS}/{fileid}`.
-  - Generated filename only.
-  - Max file size.
-  - Source: `docs/data-schema.md`.
+  - Bot이 생성한 fileid만 사용.
+  - 최대 file size.
+  - 출처: `docs/data-schema.md`.
 
-- [ ] Add slash command for sheet configuration.
+- [ ] Sheet 설정 slash command를 추가한다.
   - `/receipt sheet status`
   - `/receipt sheet set people:<url> transfers:<url>`
   - Admin-only permission check.
 
-## Spreadsheet Design
+## Spreadsheet 설계
 
-- [x] Define People Sheet columns.
+- [x] People Sheet column을 정의한다.
   - person_id
   - type
   - name
   - contact
   - optional account
-  - Source: `docs/data-schema.md`.
+  - 출처: `docs/data-schema.md`.
 
-- [x] Define Transfer Sheet columns.
+- [x] Transfer Sheet column을 정의한다.
   - transfer_id
   - person_id
   - name
@@ -43,56 +43,56 @@ Goal: Manage receipt submission and transfer status through a local Discord bot 
   - receipt_local_path
   - receipt_original_filename
   - receipt_mime_type
-  - Source: `docs/data-schema.md`.
+  - 출처: `docs/data-schema.md`.
 
 ## Discord Flow
 
-- [x] Decide command names.
-  - Recommended: `/receipt add`, `/receipt check`.
-  - Avoid unscoped receipt commands like `/check`.
-  - Source: `docs/discord-command-spec.md`.
+- [x] Command 이름을 결정한다.
+  - 권장: `/receipt add`, `/receipt check`.
+  - `/check`처럼 service scope가 없는 receipt command는 피한다.
+  - 출처: `docs/discord-command-spec.md`.
 
-- [ ] Design person/org search response.
-  - Single exact match: show confirmation.
-  - Multiple matches: show select menu.
-  - No match: open new person/org form.
+- [ ] 사람/단체 검색 응답을 설계한다.
+  - 단일 exact match: confirmation 표시.
+  - 여러 match: select menu 표시.
+  - match 없음: 신규 사람/단체 form 열기.
 
-- [ ] Design receipt image collection.
-  - Attachment in command if SDK supports it.
-  - Reply attachment fallback if not.
-  - Save uploaded image to local storage.
+- [ ] 영수증 이미지 수집 방식을 설계한다.
+  - SDK가 지원하면 command attachment.
+  - 지원하지 않으면 reply attachment fallback.
+  - 업로드 이미지는 로컬 저장소에 저장.
 
-## Product Decisions
+## 제품 결정
 
-- [ ] Decide amount input.
-  - Manual input now.
-  - OCR later if repeated use proves it matters.
+- [ ] 금액 입력 방식을 결정한다.
+  - 지금은 수동 입력.
+  - OCR은 반복 사용이 실제로 검증된 뒤.
 
-- [ ] Define privacy handling for account information.
-  - Who can run `/receipt check`?
-  - Who can see 계좌번호?
-  - Should Discord messages redact account numbers?
+- [ ] 계좌 정보 privacy handling을 정의한다.
+  - 누가 `/receipt check`를 실행할 수 있는가?
+  - 누가 계좌번호를 볼 수 있는가?
+  - Discord message에서 계좌번호를 masking해야 하는가?
 
-- [ ] Define local file storage error handling.
+- [ ] 로컬 파일 저장 오류 처리를 정의한다.
   - Storage directory missing.
   - Permission denied.
   - Duplicate upload.
   - Invalid file type.
 
-- [x] Define SQLite local state.
-  - Sheet URLs.
+- [x] SQLite local state를 정의한다.
+  - Sheet URL.
   - Local file metadata.
   - Command audit log.
-  - Source: `docs/data-schema.md`.
+  - 출처: `docs/data-schema.md`.
 
-## Validation
+## 검증
 
-- [ ] Add a known person/org through the Sheet.
-- [ ] Run `/receipt add` and confirm matching behavior.
-- [ ] Add a new person/org through Discord.
-- [ ] Confirm Transfer Sheet row starts as `송금전`.
-- [ ] Upload a receipt image and confirm it is saved locally.
-- [ ] Confirm the local path is written to the Transfer Sheet.
-- [ ] Change sheet URL with slash command and confirm new commands use it.
-- [ ] Change row to `완료` manually in Sheets.
-- [ ] Run `/receipt check` and confirm counts update.
+- [ ] Sheet에 알려진 사람/단체를 추가한다.
+- [ ] `/receipt add`를 실행하고 matching 동작을 확인한다.
+- [ ] Discord에서 신규 사람/단체를 추가한다.
+- [ ] Transfer Sheet row가 `송금전`으로 시작하는지 확인한다.
+- [ ] 영수증 이미지를 업로드하고 로컬에 저장되는지 확인한다.
+- [ ] 로컬 경로가 Transfer Sheet에 기록되는지 확인한다.
+- [ ] Slash command로 sheet URL을 변경하고 새 command가 이를 사용하는지 확인한다.
+- [ ] Sheets에서 row를 `완료`로 수동 변경한다.
+- [ ] `/receipt check`를 실행해 count가 업데이트되는지 확인한다.

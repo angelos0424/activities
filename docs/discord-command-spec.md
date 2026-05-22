@@ -1,72 +1,72 @@
-# Discord Command Spec
+# Discord 명령어 명세
 
-This document is the shared slash command contract for the local Activities Discord bot.
+이 문서는 로컬 Activities Discord bot의 공통 slash command 계약이다.
 
-The bot runs in one Discord server and separates services by channel:
+Bot은 하나의 Discord 서버에서 실행되며, 서비스별 채널을 나누어 사용한다.
 
-| Channel | Service | Commands |
+| 채널 | 서비스 | 명령어 |
 | --- | --- | --- |
-| `#sns` | SNS upload | `/post` |
-| `#receipt` | Receipt and transfer status | `/receipt add`, `/receipt check`, `/receipt sheet status`, `/receipt sheet set` |
-| `#todo` | Todo and schedule | `/todo add`, `/todo list`, `/todo status` |
+| `#sns` | SNS 업로드 | `/post` |
+| `#receipt` | 영수증 및 송금 상태 | `/receipt add`, `/receipt check`, `/receipt sheet status`, `/receipt sheet set` |
+| `#todo` | Todo 및 일정 | `/todo add`, `/todo list`, `/todo status` |
 
-## Shared Rules
+## 공통 규칙
 
-1. Commands must validate that they are being used in the expected service channel.
-2. Commands that call Google Sheets, upload files, or post to external services must defer the Discord interaction before long work starts.
-3. Failed external operations should be retried 2 to 3 times before the bot returns a final failure message and ends the flow.
-4. Retry loops must not create duplicate Google Sheets rows, duplicate local files, or duplicate SNS posts.
-5. Final failure messages should be short, user-readable, and include the next manual action.
-6. Internal stack traces, tokens, Google credentials, and local absolute paths must not be posted to Discord.
-7. Channel-specific commands should use service namespaces where possible to avoid collisions.
+1. 명령어는 기대한 서비스 채널에서 실행됐는지 검증해야 한다.
+2. Google Sheets, 파일 업로드, 외부 서비스 게시처럼 시간이 걸리는 작업은 긴 작업을 시작하기 전에 Discord interaction을 defer해야 한다.
+3. 외부 작업 실패는 2~3번 재시도한 뒤 최종 실패 안내를 반환하고 flow를 종료한다.
+4. 재시도 loop는 Google Sheets row, 로컬 파일, SNS post를 중복 생성하면 안 된다.
+5. 최종 실패 메시지는 짧고 사용자가 이해할 수 있어야 하며, 다음 수동 조치를 포함해야 한다.
+6. 내부 stack trace, token, Google credential, 로컬 absolute path는 Discord에 표시하지 않는다.
+7. 같은 서버에서 여러 서비스를 쓰므로 가능하면 서비스 namespace를 가진 command를 사용한다.
 
 ## `/post`
 
-Service: SNS upload
-Channel: `#sns`
+서비스: SNS 업로드
+채널: `#sns`
 
-### Purpose
+### 목적
 
-Start a multi-target post upload flow for Instagram, Facebook, and/or the homepage.
+Instagram, Facebook, 홈페이지 중 하나 이상에 올릴 게시물 업로드 flow를 시작한다.
 
-### Input
+### 입력
 
-| Field | Type | Required | Notes |
+| 필드 | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
 | targets | multi-select | yes | `instagram`, `facebook`, `homepage` |
-| homepage_type | select | conditional | Required when `homepage` is selected. Values: `notice`, `gallery`. |
-| title | text | yes | Post title. |
-| content | text | yes | Post body. |
-| assets | attachments | conditional | Image files and/or mp4 files. Multiple files allowed. Required for Instagram and video/Reels flows; homepage notice may be text-only. |
-| audio | object | no | Optional video/Reels metadata or uploaded audio reference. Actual Meta music library support is an open question. |
+| homepage_type | select | 조건부 | `homepage` 선택 시 필수. 값: `notice`, `gallery` |
+| title | text | yes | 게시 제목 |
+| content | text | yes | 게시 본문 |
+| assets | attachments | 조건부 | 이미지 또는 mp4. 여러 개 허용. Instagram과 video/Reels flow에는 필수이고, homepage notice는 text-only일 수 있음 |
+| audio | object | no | 선택적 video/Reels metadata 또는 업로드된 audio reference. 실제 Meta music library 지원 여부는 미결정 |
 
-### Preferred Discord UX
+### 권장 Discord UX
 
-1. User runs `/post`.
-2. Bot opens a modal/form for title and content.
-3. Bot asks for target selection using select/menu controls or buttons.
-4. Bot asks for image/mp4 attachments.
-5. Bot posts a per-target progress message.
-6. Bot returns result URLs or final failure messages.
+1. 사용자가 `/post`를 실행한다.
+2. Bot이 title/content 입력 modal/form을 연다.
+3. Bot이 select menu 또는 button으로 target 선택을 받는다.
+4. Bot이 이미지/mp4 attachment를 요청한다.
+5. Bot이 target별 진행 상태 메시지를 표시한다.
+6. Bot이 결과 URL 또는 최종 실패 메시지를 반환한다.
 
-### Fallback Discord UX
+### 대체 Discord UX
 
-If modal file upload is not stable in the chosen Discord SDK version:
+선택한 Discord SDK에서 modal file upload가 안정적이지 않으면 아래 방식으로 진행한다.
 
-1. `/post` collects title, content, target, and homepage type.
-2. Bot replies: `이미지/영상 파일을 이 메시지에 reply로 업로드해주세요.`
-3. Bot collects attachments from the reply/thread.
-4. Bot continues the upload flow.
+1. `/post`가 title, content, target, homepage_type을 받는다.
+2. Bot이 `이미지/영상 파일을 이 메시지에 reply로 업로드해주세요.`라고 안내한다.
+3. Bot이 reply 또는 thread에서 attachment를 수집한다.
+4. Bot이 업로드 flow를 계속 진행한다.
 
-### Validation Policy
+### 검증 정책
 
-- `links` is intentionally excluded from the `/post` payload because the confirmed SNS requirement source did not include it.
-- Pre-submit validation failures stop the whole request and return suggested fixes.
-- Once a request is valid and upload starts, runtime upload failures are tracked per target so successful targets do not need to be retried.
+- `links`는 `/post` payload에서 의도적으로 제외한다. 확인된 SNS 요구사항 source에 포함되지 않았기 때문이다.
+- 제출 전 검증 실패는 전체 요청을 중단하고 수정 안내를 반환한다.
+- 요청이 유효하고 업로드가 시작된 뒤의 runtime upload failure는 target별로 추적한다. 성공한 target은 다시 시도하지 않아도 된다.
 
-### Success Response
+### 성공 응답
 
-The bot returns one result block per target:
+Bot은 target별 결과 block을 반환한다.
 
 ```text
 업로드 결과
@@ -75,9 +75,9 @@ The bot returns one result block per target:
 - Facebook: 수동 업로드 필요
 ```
 
-### Failure Response
+### 실패 응답
 
-After 2 to 3 retries:
+2~3번 재시도 후:
 
 ```text
 Instagram 업로드 실패
@@ -87,41 +87,41 @@ Instagram 업로드 실패
 
 ## `/receipt add`
 
-Service: Receipt
-Channel: `#receipt`
+서비스: 영수증
+채널: `#receipt`
 
-### Purpose
+### 목적
 
-Create a transfer row for a person or organization and attach a locally stored receipt image.
+사람/단체 기준 송금 row를 만들고, 로컬에 저장한 영수증 이미지를 연결한다.
 
-### Input
+### 입력
 
-| Field | Type | Required | Notes |
+| 필드 | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
-| name | text | yes | Person or organization name to search in People Sheet. |
+| name | text | yes | People Sheet에서 검색할 사람/단체명 |
 
 ### Flow
 
-1. User runs `/receipt add name:"..."`.
-2. Bot searches People Sheet.
-3. If one or more matches exist, bot shows candidates with confirm/select buttons.
-4. If no match exists, bot opens a new person/org form.
-5. Bot creates a Transfers Sheet row with status `송금전`.
-6. Bot asks the user to upload the receipt image.
-7. Bot saves the image to `data/receipts/{yyyy}/{MM}/{HHMMSS}/{fileid}`.
-8. Bot records file metadata and links the local path to the transfer row.
-9. Bot returns the created transfer summary.
+1. 사용자가 `/receipt add name:"..."`을 실행한다.
+2. Bot이 People Sheet를 검색한다.
+3. 하나 이상의 후보가 있으면 확인/선택 버튼과 함께 보여준다.
+4. 후보가 없으면 신규 사람/단체 입력 form을 연다.
+5. Bot이 상태 `송금전`인 Transfers Sheet row를 만든다.
+6. Bot이 영수증 이미지 업로드를 요청한다.
+7. Bot이 이미지를 `data/receipts/{yyyy}/{MM}/{HHMMSS}/{fileid}`에 저장한다.
+8. Bot이 파일 metadata를 기록하고 transfer row에 로컬 경로를 연결한다.
+9. Bot이 생성된 송금 요청 요약을 반환한다.
 
-### New Person/Org Form
+### 신규 사람/단체 form
 
-| Field | Type | Required | Notes |
+| 필드 | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
-| name | text | yes | Defaults to searched name. |
+| name | text | yes | 검색한 이름을 기본값으로 사용 |
 | type | select | yes | `person`, `organization` |
-| contact | text | yes | Free text. |
-| account | text | no | Bank/account holder/account number. |
+| contact | text | yes | 자유 텍스트 |
+| account | text | no | 은행/예금주/계좌번호 |
 
-### Success Response
+### 성공 응답
 
 ```text
 영수증 등록 완료
@@ -130,9 +130,9 @@ Create a transfer row for a person or organization and attach a locally stored r
 - 저장 위치: data/receipts/2026/05/143012/receipt_01
 ```
 
-### Failure Response
+### 실패 응답
 
-After 2 to 3 retries:
+2~3번 재시도 후:
 
 ```text
 영수증 등록 실패
@@ -142,25 +142,25 @@ After 2 to 3 retries:
 
 ## `/receipt check`
 
-Service: Receipt
-Channel: `#receipt`
+서비스: 영수증
+채널: `#receipt`
 
-### Purpose
+### 목적
 
-Summarize transfer rows and show how many are not complete.
+송금 row를 집계하고 완료되지 않은 건수를 보여준다.
 
-### Input
+### 입력
 
-No required input.
+필수 입력은 없다.
 
-Optional future filters:
+향후 추가할 수 있는 optional filter:
 
-| Field | Type | Required | Notes |
+| 필드 | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
 | status | select | no | `송금전`, `보류`, `완료`, `all` |
-| limit | integer | no | Max incomplete rows to show. |
+| limit | integer | no | 표시할 미완료 row 최대 개수 |
 
-### Response
+### 응답
 
 ```text
 송금 현황
@@ -174,14 +174,14 @@ Optional future filters:
 
 ## `/receipt sheet status`
 
-Service: Receipt
-Channel: `#receipt`
+서비스: 영수증
+채널: `#receipt`
 
-### Purpose
+### 목적
 
-Show the currently configured People Sheet and Transfers Sheet.
+현재 설정된 People Sheet와 Transfers Sheet를 보여준다.
 
-### Response
+### 응답
 
 ```text
 Receipt Sheets
@@ -192,55 +192,55 @@ Receipt Sheets
 
 ## `/receipt sheet set`
 
-Service: Receipt
-Channel: `#receipt`
+서비스: 영수증
+채널: `#receipt`
 
-### Purpose
+### 목적
 
-Update receipt-related Google Sheets URLs.
+영수증 관련 Google Sheets URL을 변경한다.
 
-### Input
+### 입력
 
-| Field | Type | Required | Notes |
+| 필드 | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
-| people | url/text | yes | People Sheet URL or Sheet ID. |
-| transfers | url/text | yes | Transfers Sheet URL or Sheet ID. |
+| people | url/text | yes | People Sheet URL 또는 Sheet ID |
+| transfers | url/text | yes | Transfers Sheet URL 또는 Sheet ID |
 
-### Permission
+### 권한
 
-This command is admin-only. The exact Discord role name is an implementation config value.
+이 명령어는 admin 전용이다. 정확한 Discord role 이름은 구현 config 값으로 둔다.
 
 ### Flow
 
-1. Validate user permission.
-2. Validate both URLs or IDs.
-3. Check that the Google service account can read/write both sheets.
-4. Store values in SQLite `bot_config`.
-5. Return confirmation.
+1. 사용자 권한을 검증한다.
+2. 두 URL 또는 ID를 검증한다.
+3. Google service account가 두 Sheet를 read/write할 수 있는지 확인한다.
+4. 값을 SQLite `bot_config`에 저장한다.
+5. 확인 메시지를 반환한다.
 
 ## `/todo add`
 
-Service: Todo
-Channel: `#todo`
+서비스: Todo
+채널: `#todo`
 
-### Purpose
+### 목적
 
-Create a schedule/todo item.
+일정 또는 todo item을 만든다.
 
-### Input
+### 입력
 
-| Field | Type | Required | Notes |
+| 필드 | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
-| title | text | yes | Schedule/todo title. |
-| description | text | no | Details. |
-| starts_at | datetime/text | yes | MVP may accept text then normalize later. |
-| estimated_duration_minutes | integer | no | Expected duration. |
-| location_name | text | no | Place name. |
-| location_address | text | no | Address or map search text. |
-| related_party | text/select | no | Person or organization. |
+| title | text | yes | 일정/todo 제목 |
+| description | text | no | 상세 내용 |
+| starts_at | datetime/text | yes | MVP에서는 텍스트로 받은 뒤 나중에 정규화할 수 있음 |
+| estimated_duration_minutes | integer | no | 예상 소요 시간 |
+| location_name | text | no | 장소명 |
+| location_address | text | no | 주소 또는 지도 검색어 |
+| related_party | text/select | no | 사람 또는 단체 |
 | type | select | yes | `meeting`, `meetup`, `project`, `admin`, `other` |
 
-### Response
+### 응답
 
 ```text
 일정 등록 완료
@@ -251,46 +251,46 @@ Create a schedule/todo item.
 
 ## `/todo list`
 
-Service: Todo
-Channel: `#todo`
+서비스: Todo
+채널: `#todo`
 
-### Purpose
+### 목적
 
-Show upcoming and incomplete schedule/todo items.
+예정된 항목과 미완료 일정/todo를 보여준다.
 
-### Input
+### 입력
 
-| Field | Type | Required | Notes |
+| 필드 | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
-| range | select | no | `today`, `week`, `all`. Default: `today`. |
-| status | select | no | `wait`, `progress`, `done`, `dismiss`, `open`. Default: `open`. |
-| type | select | no | Optional type filter. |
+| range | select | no | `today`, `week`, `all`. 기본값: `today` |
+| status | select | no | `wait`, `progress`, `done`, `dismiss`, `open`. 기본값: `open` |
+| type | select | no | 선택적 type filter |
 
-### Sorting
+### 정렬
 
-1. Today's items first.
-2. Earlier `starts_at` first.
-3. `wait` and `progress` before `done` and `dismiss`.
+1. 오늘 일정 먼저.
+2. `starts_at`이 빠른 순.
+3. `wait`, `progress`가 `done`, `dismiss`보다 먼저.
 
 ## `/todo status`
 
-Service: Todo
-Channel: `#todo`
+서비스: Todo
+채널: `#todo`
 
-### Purpose
+### 목적
 
-Update a schedule/todo status.
+일정/todo 상태를 변경한다.
 
-### Input
+### 입력
 
-| Field | Type | Required | Notes |
+| 필드 | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
-| item | text/select | yes | Item id or selected item. |
+| item | text/select | yes | item id 또는 선택된 item |
 | status | select | yes | `wait`, `progress`, `done`, `dismiss` |
-| result_note | text | no | Required later for some done flows if needed. |
-| result_link | text | no | Optional output link. |
+| result_note | text | no | 필요하면 일부 done flow에서 필수로 바꿀 수 있음 |
+| result_link | text | no | 선택적 결과 링크 |
 
-### Response
+### 응답
 
 ```text
 상태 변경 완료
