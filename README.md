@@ -51,7 +51,7 @@ npm install
 npm run dev
 ```
 
-Run the backend from an environment with Java 21 and Maven:
+Run the backend scaffold from an environment with Java 21 and Maven:
 
 ```bash
 cd backend
