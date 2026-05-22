@@ -50,7 +50,7 @@ Goal: make the scope implementable without reinterpreting old meeting/accounting
 - [x] Use root `TODOS.md` as the execution roadmap.
 - [x] Decide Discord as the shared operation surface.
 - [x] Decide local bot MVP stack.
-- [x] Decide receipt local file path: `data/receipts/{yyyy}/{MM}/{generated_filename}`.
+- [x] Decide receipt local file path: `data/receipts/{yyyy}/{MM}/{HHMMSS}/{fileid}`.
 - [x] Add Discord command spec.
 - [x] Add shared data schema.
 - [ ] Confirm exact Google Sheets column headers with the real sheets.

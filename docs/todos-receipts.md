@@ -13,7 +13,7 @@ Goal: Manage receipt submission and transfer status through a local Discord bot 
   - Source: `docs/tech-stack.md`.
 
 - [ ] Define local receipt storage.
-  - `data/receipts/{yyyy}/{MM}/{generated_filename}`.
+  - `data/receipts/{yyyy}/{MM}/{HHMMSS}/{fileid}`.
   - Generated filename only.
   - Max file size.
   - Source: `docs/data-schema.md`.

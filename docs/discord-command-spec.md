@@ -37,7 +37,8 @@ Start a multi-target post upload flow for Instagram, Facebook, and/or the homepa
 | homepage_type | select | conditional | Required when `homepage` is selected. Values: `notice`, `gallery`. |
 | title | text | yes | Post title. |
 | content | text | yes | Post body. |
-| assets | attachments | yes | Image files and/or mp4 files. Multiple files allowed. |
+| assets | attachments | conditional | Image files and/or mp4 files. Multiple files allowed. Required for Instagram and video/Reels flows; homepage notice may be text-only. |
+| audio | object | no | Optional video/Reels metadata or uploaded audio reference. Actual Meta music library support is an open question. |
 
 ### Preferred Discord UX
 
@@ -56,6 +57,12 @@ If modal file upload is not stable in the chosen Discord SDK version:
 2. Bot replies: `이미지/영상 파일을 이 메시지에 reply로 업로드해주세요.`
 3. Bot collects attachments from the reply/thread.
 4. Bot continues the upload flow.
+
+### Validation Policy
+
+- `links` is intentionally excluded from the `/post` payload because the confirmed SNS requirement source did not include it.
+- Pre-submit validation failures stop the whole request and return suggested fixes.
+- Once a request is valid and upload starts, runtime upload failures are tracked per target so successful targets do not need to be retried.
 
 ### Success Response
 
@@ -101,7 +108,7 @@ Create a transfer row for a person or organization and attach a locally stored r
 4. If no match exists, bot opens a new person/org form.
 5. Bot creates a Transfers Sheet row with status `송금전`.
 6. Bot asks the user to upload the receipt image.
-7. Bot saves the image to `data/receipts/{yyyy}/{MM}/{generated_filename}`.
+7. Bot saves the image to `data/receipts/{yyyy}/{MM}/{HHMMSS}/{fileid}`.
 8. Bot records file metadata and links the local path to the transfer row.
 9. Bot returns the created transfer summary.
 
@@ -120,7 +127,7 @@ Create a transfer row for a person or organization and attach a locally stored r
 영수증 등록 완료
 - 이름: 홍길동
 - 상태: 송금전
-- 저장 위치: data/receipts/2026/05/...
+- 저장 위치: data/receipts/2026/05/143012/receipt_01
 ```
 
 ### Failure Response

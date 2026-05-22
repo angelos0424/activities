@@ -27,7 +27,9 @@ Goal: Build the first product slice around Discord-based SNS upload in `#sns`.
   - homepage type: notice, gallery
   - title/content
   - multiple image/mp4 files
-  - Source: `docs/discord-command-spec.md`.
+  - No generic `links` field in the initial confirmed payload.
+  - Optional `audio` metadata remains provider-dependent.
+  - Source: `docs/discord-command-spec.md`, folded in from local `SNS_POST_REQUIREMENTS.md`.
 
 - [x] Define result tracking.
   - Per-channel status.
@@ -50,7 +52,8 @@ Goal: Build the first product slice around Discord-based SNS upload in `#sns`.
   - Manual upload packet fallback for channels without API access.
 
 - [x] Define failure behavior.
-  - One channel failure should not block other channels.
+  - Pre-submit validation failure stops the whole request with suggested fixes.
+  - After upload starts, one target failure should not block already successful targets.
   - Failed channels should be retryable independently.
   - User-facing error must not expose secrets or raw provider responses.
   - Source: `docs/discord-command-spec.md`.

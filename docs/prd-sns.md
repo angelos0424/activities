@@ -80,7 +80,26 @@ MVP fallback:
 3. 사용자가 파일을 메시지 첨부로 올린다.
 4. Bot이 해당 attachments를 수집해 업로드 작업을 진행한다.
 
-## 8. Functional Requirements
+## 8. Source Requirement Notes
+
+This PRD incorporates the local source note `SNS_POST_REQUIREMENTS.md` from the working tree used before PR 109. When that note conflicts with the PR 109 documentation set, PR 109 remains the organizing source of truth and the note is folded in as implementation detail.
+
+Confirmed `/post` source requirements:
+
+1. Select upload targets: Instagram, Facebook, Homepage.
+2. If Homepage is selected, choose Notice or Gallery.
+3. Enter `title` and `content` through Discord modal/form UX where possible.
+4. Upload multiple image files or mp4 videos.
+5. Return result URLs per target.
+6. Exclude a generic `links` field until a confirmed requirement introduces it.
+7. Include optional `audio` metadata for video/Reels planning, but keep actual Meta music-library support as an open question.
+
+Conflict handling:
+
+- Source note says validation failure should stop the whole request; PR 109 says one channel failure should not block other channels. Use both by phase: input validation failure stops the request before upload; after upload starts, failures are recorded per target and successful targets remain successful.
+- Source note says Homepage should not add a separate DB. PR 109 keeps SQLite request/target tracking as the MVP source of truth; Homepage adapter code should avoid its own additional homepage-specific database unless a future issue requires it.
+
+## 9. Functional Requirements
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
@@ -92,8 +111,11 @@ MVP fallback:
 | SNS-FE-006 | Facebook upload adapter를 제공한다. | P1 |
 | SNS-FE-007 | 채널별 업로드 결과를 저장한다. | P0 |
 | SNS-FE-008 | 실패한 채널만 재시도할 수 있다. | P1 |
+| SNS-FE-009 | Pre-submit validation failure stops the whole request and returns suggested fixes. | P0 |
+| SNS-FE-010 | `links` is excluded from the initial payload unless a later requirement confirms it. | P1 |
+| SNS-FE-011 | Optional `audio` metadata is allowed for video/Reels planning, with provider support verified separately. | P2 |
 
-## 9. Data Model
+## 10. Data Model
 
 ### `sns_posts`
 
@@ -133,7 +155,7 @@ MVP fallback:
 | size_bytes | bigint | file size |
 | storage_url | text | persisted copy if needed |
 
-## 10. Validation Rules
+## 11. Validation Rules
 
 1. Title is required.
 2. Content is required.
@@ -142,8 +164,12 @@ MVP fallback:
 5. Assets must be image or mp4.
 6. Multiple assets are allowed, but each platform adapter may enforce its own limit.
 7. If platform upload is not configured, return "manual upload required" with prepared content instead of silently failing.
+8. Pre-submit validation failures stop the entire request and suggest corrections.
+9. Runtime upload failures are per-target after validation succeeds.
+10. The initial payload does not include `links`.
+11. `audio` is optional and only used when a video/Reels flow requires it.
 
-## 11. Acceptance Criteria
+## 12. Acceptance Criteria
 
 1. `/post` starts the SNS upload flow in `#sns`.
 2. User can choose Instagram, Facebook, Homepage in one request.
@@ -154,16 +180,18 @@ MVP fallback:
 7. Failed uploads show clear, channel-specific failure messages.
 8. All attempts are recorded for later review.
 
-## 12. Open Questions
+## 13. Open Questions
 
 1. 홈페이지는 어떤 CMS/API를 쓰는가?
 2. Instagram/Facebook은 단체 계정이 Business/Page 권한을 갖고 있는가?
 3. Meta app review를 통과할 계획인가, 아니면 MVP는 홈페이지 자동 업로드 + SNS 수동 보조로 갈 것인가?
 4. 파일 최대 개수와 최대 용량은 어떻게 제한할 것인가?
 5. 업로드 전 승인자가 필요한가?
+6. Meta API로 Instagram/Facebook 공식 음악 라이브러리 선택 또는 삽입을 지원할 수 있는가?
 
-## 13. References
+## 14. References
 
 - Discord application command options include attachment input: https://docs.discord.com/developers/interactions/application-commands
 - Discord modal components support form-style collection: https://docs.discord.com/developers/components/using-modal-components
 - Discord added modal file upload components in 2025: https://docs.discord.com/developers/change-log#introducing-the-file-upload-component-in-modals
+- Local source note folded into this PR: `/home/twkim/Project/activities/SNS_POST_REQUIREMENTS.md`
