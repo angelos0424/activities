@@ -3,9 +3,82 @@
 Source of truth for the current MVP: Discord bot workflows operated through
 slash commands in configured Discord channels.
 
-This roadmap replaces the previous OCR, meeting transcript, and web frontend
-roadmap. The old web-first work is tracked under "Superseded and Deferred
-Legacy Scope" at the bottom of this file.
+## Current MVP Source of Truth
+
+The active MVP is an SNS 업무 자동화 Discord bot operated through slash
+commands in configured Discord channels.
+
+The roadmap below separates the current execution queue from the legacy web,
+OCR, meeting transcript, and report-screen plan. Legacy items are preserved for
+context, but they are deferred and must not be picked up as active work unless a
+future issue explicitly moves them back into scope.
+
+## Why the Roadmap Changed
+
+- Discord bot first is the lowest-cost way to validate the workflows users need
+  right now.
+- A web app, OCR provider, meeting analysis pipeline, and report UI would expand
+  the MVP before the Discord workflow is proven.
+- Current tasks should prefer command contracts, channel guardrails, local test
+  fakes, and simple persistence boundaries over browser screens.
+
+## Current Execution Queue
+
+- [ ] Define the Discord bot command inventory.
+  - Include command names, required arguments, optional arguments, success text,
+    and failure text for the first MVP commands.
+  - Domains considered: SNS, Receipts, Google Sheets, Todo.
+  - Validation: command spec is committed as a markdown or code-adjacent
+    contract document.
+
+- [ ] Add the minimal Discord bot runtime scaffold.
+  - Include application entrypoint, config loading, Discord token loading, and
+    allowed channel loading.
+  - Keep secrets in environment variables only.
+  - Validation: local startup fails clearly when required env vars are missing.
+
+- [ ] Implement configured-channel enforcement.
+  - Reject commands from non-allowed channels before domain handlers run.
+  - Validation: tests cover allowed channel, rejected channel, and missing
+    channel configuration.
+
+- [ ] Implement one no-side-effect smoke command.
+  - A command such as `/ping` or `/status` should return bot health and
+    configured domain availability.
+  - Validation: command handler tests cover success and error formatting.
+
+- [ ] Decide and specify the first production domain command.
+  - Choose one first command from SNS, Receipts, Google Sheets, or Todo.
+  - Validation: selected command has acceptance criteria before implementation.
+
+## Current Discussion Queue
+
+- [ ] Decide hosting/runtime target.
+  - Compare single long-running bot process, containerized service, and
+    serverless interaction endpoint.
+
+- [ ] Decide persistent storage boundary.
+  - Compare PostgreSQL, Google Sheets, and local/file storage for development.
+
+- [ ] Decide initial command permissions.
+  - Clarify whether channel allowlist is enough or user/role allowlists are
+    required from day one.
+
+- [ ] Decide Korean/English response policy.
+  - Clarify whether bot responses are Korean-only, English-only, or match input.
+
+---
+
+## Superseded and Deferred Legacy Roadmap
+
+Status: deferred. The content below is preserved from the earlier web/OCR/meeting
+roadmap and is not part of the current MVP execution queue.
+
+Re-entry rule: move one legacy item into the current queue only when a future
+issue names the domain, explains why Discord bot MVP needs it now, and includes
+targeted validation.
+
+## Legacy Current Status
 
 ## Execution Rules
 
@@ -398,9 +471,19 @@ Discord slash commands, not a browser or mobile app.
 
 ### Deferred: OCR Analysis and Expense Data Server
 
+---
+
+## Legacy 2. OCR Analysis and Expense Data Server
+
+Goal: Implement the accounting backend path from receipt image upload to OCR-derived expense data and scheduled unpaid notification.
+
+Related PRD items: Goals 1-2, Accounting Flow, BE-001 through BE-005, Open Questions 1-2.
+
+### 2.1 Accounting data model
 These legacy accounting backend tasks are deferred until the Receipts domain
 chooses OCR, PostgreSQL accounting tables, or scheduled payment notification as
 active MVP behavior.
+
 
 - [ ] Add a Flyway migration for accounting tables.
   - Legacy suggested file:
@@ -492,8 +575,20 @@ active MVP behavior.
 
 ### Deferred: STT/TXT Meeting Upload and Analysis Server
 
+---
+
+## Legacy 3. STT/TXT Meeting Upload and Analysis Server
+
+Goal: Implement the meeting backend path for TXT transcript upload, text processing, embedding, summary, decisions, action items, list/detail/search/report APIs.
+
+Note: PRD currently scopes the MVP to TXT meeting transcript upload. Audio STT conversion is a future extension unless explicitly added later.
+
+Related PRD items: Goals 3-5, Meeting Upload Flow, Meeting Detail and Report Flow, Meeting Search Flow, BE-006 through BE-011, DB-001 through DB-006.
+
+### 3.1 Meeting API contracts
 These legacy meeting backend tasks are deferred until meeting transcript
 automation becomes an explicit active domain again.
+
 
 - [ ] Define meeting DTOs.
   - Legacy suggested package: `com.activities.meetings.dto`
@@ -611,8 +706,18 @@ automation becomes an explicit active domain again.
 
 ### Deferred: Legacy Integration Validation
 
+---
+
+## Legacy 4. Integration Validation
+
+Goal: Prove the client, server, database, and MVP flows work together.
+
+Related PRD items: Acceptance Criteria 1-8.
+
+### 4.1 Local environment
 These legacy end-to-end checks are deferred because they validate the old
 browser-plus-Spring flow, not the active Discord command flow.
+
 
 - [ ] Start PostgreSQL.
   - Command: `docker compose up -d db`
@@ -656,8 +761,22 @@ browser-plus-Spring flow, not the active Discord command flow.
 
 ### Deferred: Legacy Clarifications Before Full Implementation
 
+- [ ] Run backend tests.
+  - Command: `cd backend && mvn test`
+
+- [ ] Run repository hygiene check.
+  - Command: `git diff --check`
+
+- [ ] Update README with final run instructions once endpoints and flows are implemented.
+
+---
+
+## Legacy 5. Follow-up Clarifications Before Full Implementation
+
+These do not block scaffold-level work, but should be answered before productionizing the flows.
 These questions do not block Discord bot scaffold work. They should be answered
 only if the matching deferred legacy scope is reactivated.
+
 
 - [ ] Confirm minimum accounting fields for OCR-derived expense data.
 - [ ] Confirm whether unpaid notification recipient is fixed by config or
