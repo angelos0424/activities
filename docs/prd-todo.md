@@ -2,7 +2,7 @@
 
 Source:
 - `docs/todo_domain_transcript.md`
-- `/home/twkim/wikis/jisu/queries/2026-05-22-todo-domain-interview-summary.md`
+- internal TODO domain interview summary
 
 Status: active domain PRD for Discord-first Activities MVP.
 
@@ -61,10 +61,10 @@ Status: active domain PRD for Discord-first Activities MVP.
 | title | yes | TODO 제목 |
 | description | no | 상세 설명 |
 | status | yes | wait, progress, done, dismiss |
-| due_at | no | 마감 또는 알림 기준 시간 |
+| due_at | no | 마감 또는 알림 기준 시간. 없으면 목록 정렬에서 오늘/마감 TODO보다 뒤에 둔다. |
 | delayed_until | no | 반자동 지연 후 새 기준일 |
-| category | no | personal, office, shared, all 등 |
-| visibility | yes | private, office, shared, public |
+| category | no | 업무 유형. 예: admin, ops, development, finance, event, other |
+| visibility | yes | 노출/알림 범위. 값: private, office, shared, public |
 | requester_id | no | 요청자. 확장 필드 |
 | assignee_id | yes | 담당자. MVP 핵심 필드 |
 | collaborators | no | 공동 작업자 목록 |
@@ -148,9 +148,10 @@ Status: active domain PRD for Discord-first Activities MVP.
 1. 오늘 마감 또는 오늘 알림 TODO 먼저.
 2. 상태가 `wait` 또는 `progress`인 TODO 먼저.
 3. 담당자가 본인인 TODO 먼저.
-4. 지연된 TODO는 별도 표시.
-5. `done`과 `dismiss`는 active work 아래로 내림.
-6. 같은 날짜 안에서는 due time 순.
+4. `due_at`이 없는 TODO는 마감이 있는 active TODO 뒤에 배치한다.
+5. 지연된 TODO는 별도 표시.
+6. `done`과 `dismiss`는 active work 아래로 내림.
+7. 같은 날짜 안에서는 due time 순.
 
 ## 10. 알림 정책
 

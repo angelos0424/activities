@@ -1,6 +1,6 @@
 # TODO 도메인 인터뷰 전사 정리
 
-Source: `/home/twkim/.hermes/audio_cache/todo_domain_transcript.md`
+Source: Discord audio transcript summarized for the TODO domain
 Updated: 2026-05-23
 
 > 자동 전사 기반 정리다. 고유명사와 일부 발화는 오인식 가능성이 있으므로 PRD에는 확인된 요구사항 중심으로 반영한다.
