@@ -16,7 +16,7 @@ Closes #
 ## Scope
 <!-- Check all that apply. -->
 - [ ] sns
-- [ ] recipe
+- [ ] receipt
 - [ ] todo
 - [ ] docs/config/shared
 
