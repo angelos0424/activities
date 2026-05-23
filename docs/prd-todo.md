@@ -105,7 +105,7 @@ task, where it came from, and who is expected to act.
 
 | Field | Required | Description |
 | --- | --- | --- |
-| `id` | yes | Stable task id returned by `/todo-add` and accepted by `/todo-done`. |
+| `id` | yes | Stable, human-friendly task id, such as `#1`, returned by `/todo-add` and accepted by `/todo-done`. It must be easy to type manually and must not expose UUIDs or Discord Snowflakes as the primary user input. |
 | `title` | yes | User-entered task title after trimming whitespace. |
 | `status` | yes | `open` on creation, `done` after completion. |
 | `requester` | yes | Discord user id of the command requester. |
@@ -143,8 +143,9 @@ open -- /todo-done <id> --> done
    resolves to a Discord user id, such as `<@123>` or `<@!123>`.
 5. Invalid, role, channel, or free-text assignee values must return a validation
    failure instead of creating a task.
-6. `/todo-done id` is required and must match an existing open todo visible to
-   the command context.
+6. `/todo-done id` is required and must use the human-friendly id format
+   returned by `/todo-add`, such as `#1`; UUIDs, Discord Snowflakes, and other
+   system identifiers are not valid primary command inputs.
 7. `/todo-list` must handle an empty result set with a clear empty-list message
    instead of an error.
 8. Validation failures must not create, update, or complete a todo record.
@@ -190,8 +191,8 @@ User flow:
 2. User may filter by `status` or `assignee` if those options are implemented in
    the first command registration.
 3. Bot validates filters and channel guardrails.
-4. Bot returns matching todos ordered by creation time or due date. The ordering
-   rule must be explicit in the implementation contract before coding.
+4. Bot returns matching todos ordered by due date ascending, with records that
+   have no due date last, then by creation time ascending.
 5. Bot returns a friendly empty-list response when no records match.
 
 Acceptance criteria:

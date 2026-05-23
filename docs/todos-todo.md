@@ -258,6 +258,10 @@ section as the first Todo command contract.
   - Use the PRD candidates: `/todo-add`, `/todo-list`, and `/todo-done`.
   - Output should include task summary, validation failure text, empty-list
     text, and next action for each command.
+  - Use stable, human-friendly task IDs, such as `#1`, for `/todo-done`
+    instead of UUIDs or Discord Snowflakes as primary user input.
+  - Define `/todo-list` default ordering as due date ascending, null due dates
+    last, then creation time ascending.
 
 - [ ] Validate todo command input.
   - Cover required title, maximum title length, optional due date parsing, and
