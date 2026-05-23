@@ -26,7 +26,7 @@ Closes #
 - [ ] Tests/lint/build: 
 
 ## Review / Full-auto Checklist
-- [ ] PR title starts with the service prefix when applicable: `[sns]`, `[recipe]`, or `[todo]`
+- [ ] PR title starts with the service prefix when applicable: [sns], [receipt], or [todo]
 - [ ] PR body includes `Closes #<issue-number>` or explains why there is no linked issue
 - [ ] Linked issue is moved to `In Review` when the PR is ready for review
 - [ ] Linked issue body contains `Target-PR`, `Target-Branch`, and `Existing PR`
