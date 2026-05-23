@@ -8,7 +8,7 @@ Closes #
 
 ## Symphony Metadata
 <!-- Required when this PR belongs to a Symphony-managed issue. After creating the PR, update the linked issue body with the same Target-PR / Target-Branch / Existing PR values so In Review follow-up and reviewbot feedback can be picked up. -->
-- Service: <sns | recipe | todo>
+- Service: <sns | receipt | todo>
 - Target-PR: <PR number>
 - Target-Branch: <branch name>
 - Existing PR: <PR URL>
