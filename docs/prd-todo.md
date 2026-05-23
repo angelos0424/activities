@@ -1,182 +1,206 @@
 # PRD: `todo-manager` 서비스
 
+Source:
+- `docs/todo_domain_transcript.md`
+- internal TODO domain interview summary
+
+Status: active domain PRD for Discord-first Activities MVP.
+
 ## 1. 요약
 
-`todo-manager` 서비스는 Discord `#todo` 채널에서 일정, 업무 상태, 관련 사람/단체, 결과물 링크/파일을 관리하는 일정 중심 서비스다.
+`todo-manager`는 Discord `#todo` 채널에서 개인/사무국/공동 작업 TODO를 생성, 조회, 지연, 상태 변경, 알림 처리하는 서비스다.
 
-이 서비스는 플랫폼 통합을 위해 Discord bot으로 처리한다. 다만 현재 사용 중인 일정 관리 방법과 불편함을 먼저 확인해야 한다. 잘못 만들면 기존 카카오톡 캘린더보다 힘이 더 들고 불편한 도구가 된다.
+초기 방향은 완전한 캘린더 대체가 아니다. 사용자가 이미 겪는 핵심 문제인 `잊어버림`, `지난 일정 수동 지연`, `업무 배분`, `공동 작업 가시성`, `알림 위치 분리`를 먼저 해결한다.
 
-## 2. 목표
+## 2. 문제 정의
 
-1. 일정명, 일정내용, 일정 시간, 예상 소요 시간, 위치, 관련 사람/단체를 기록한다.
-2. 일정 상태를 wait, progress, done, dismiss 등으로 관리한다.
-3. 일정 타입을 회의, 미팅, 사업 등으로 구분한다.
-4. 결과물 메모, link, 파일 첨부를 일정에 연결한다.
-5. 일정 리스트를 사용자가 이해하기 쉬운 방식으로 정렬한다.
-6. 위치가 있는 일정은 지도 앱으로 연결한다.
-7. 같은 날짜 일정 간 이동 방법과 예상 이동 시간을 볼 수 있게 한다.
-8. `#todo` 채널에서 일정 생성, 목록 확인, 상태 변경을 처리한다.
+1. TODO를 만들어도 잊어버린다.
+2. 오늘 못 한 일이나 지난 일정을 사용자가 직접 하나씩 미뤄야 한다.
+3. Google Sheet 링크 공유로 업무를 배분하면 구성원이 확인하기 번거롭다.
+4. 개인 작업, 사무국 작업, 공동 작업, 전체 공유 작업이 섞여 보인다.
+5. 알림이 개인/사무국/전체 범위에 맞게 분리되지 않으면 피로도가 커진다.
+6. Discord 명령이 너무 복잡하면 Google Calendar/Tasks/Sheets보다 불편해질 수 있다.
 
-## 3. MVP에서 하지 않는 것
+## 3. 목표
 
-1. 기존 캘린더 전체 대체.
-2. 복잡한 프로젝트 관리 도구.
-3. 모든 지도/교통수단 지원.
-4. 자동 최적 일정 생성.
-5. 조직 전체 권한 시스템.
-6. 반복 일정 고급 규칙.
-7. 초기 버전에서 완전한 캘린더 UI 제공.
+1. Discord `#todo`에서 TODO를 생성, 조회, 상태 변경한다.
+2. 미완료 TODO를 `내일`, `3일 뒤`, `직접 지정 날짜`로 반자동 지연 처리한다.
+3. 담당자, 공동 작업자, 확인자, 요청자 역할을 기록하되 MVP는 담당자를 중심으로 시작한다.
+4. 개인/사무국/공동/전체 작업 범위를 구분한다.
+5. 공개 범위에 따라 개인 DM, 사무국 채널, 전체 채널로 알림을 분리한다.
+6. Google Sheets/Tasks/Calendar 연동 가능성을 열어두되 첫 구현은 Discord command 계약과 테스트 가능한 저장소 경계부터 검증한다.
 
-## 4. 구현 전 사용자 조사
+## 4. MVP에서 하지 않는 것
 
-`todo-manager`는 구현 전에 사용자 요구사항 분석이 필수다.
-
-확인해야 할 질문:
-
-1. 현재 일정 관리는 정확히 어디에서 하는가? KakaoTalk Calendar, Google Calendar, Sheet, 메신저 공지 중 무엇인가?
-2. 현재 방식에서 제일 불편한 점은 무엇인가?
-3. 누가 일정을 만들고, 누가 확인하고, 누가 완료 처리하는가?
-4. 일정 누락이 실제로 어떤 사고를 만들었는가?
-5. 이동 시간 계산이 정말 자주 필요한가, 아니면 있으면 좋은 기능인가?
-6. 결과물 첨부가 중요한 일정 타입은 무엇인가?
-7. Discord 명령만으로 충분한가, 보조 web/mobile UI가 필요한가?
+1. 기존 Google Calendar 또는 KakaoTalk Calendar 전체 대체.
+2. 완전 자동 지연 처리.
+3. 복잡한 프로젝트 관리 도구.
+4. 조직 전체 권한 시스템.
+5. 반복 일정 고급 규칙.
+6. 초기 버전에서 완전한 캘린더 UI 제공.
+7. 초기 버전에서 Naver Directions API 기반 이동 시간 계산.
+8. LLM/음성 입력을 필수 경로로 강제.
 
 ## 5. 사용자
 
 | 사용자 | 필요 |
 | --- | --- |
-| 총무/운영 담당자 | 단체 일정을 만들고 진행 상태를 확인한다. |
-| 일정 담당자 | 본인이 맡은 일정과 결과물을 업데이트한다. |
-| 참여자 | 오늘/이번 주 해야 할 일과 위치를 확인한다. |
-| 관리자 | 일정 누락, 지연, 완료 상태를 본다. |
+| 총무/운영 담당자 | TODO를 만들고 담당자를 배분하며 지연/진행 상태를 확인한다. |
+| 담당자 | 본인이 맡은 TODO와 마감/알림을 확인하고 상태를 업데이트한다. |
+| 공동 작업자/확인자 | 공동 작업의 진행도와 본인 역할을 확인한다. |
+| 참여자 | 전체 공유 일정/TODO 알림을 필요한 범위에서 받는다. |
+| 관리자 | 지연, 미완료, 완료 상태를 확인한다. |
 
 ## 6. 핵심 Entity
 
-### Schedule Item
+### 6.1 Todo Item
 
 | 필드 | 필수 | 메모 |
 | --- | --- | --- |
 | id | yes | 내부 id |
-| title | yes | 일정명 |
-| description | no | 일정내용 |
-| starts_at | yes | 일정 시작 시간 |
-| ends_at | no | 종료 시간 |
-| estimated_duration_minutes | no | 예상 소요 시간 |
-| location_name | no | 장소명 |
-| location_address | no | 주소 |
-| related_party_id | no | 사람 또는 단체 |
-| type | yes | meeting, meetup, project, admin, other |
+| title | yes | TODO 제목 |
+| description | no | 상세 설명 |
 | status | yes | wait, progress, done, dismiss |
-| result_note | no | 결과물 메모 |
-| result_link | no | 결과물 링크 |
-| attachment_url | no | 파일 첨부 |
+| due_at | no | 마감 또는 알림 기준 시간. 없으면 목록 정렬에서 오늘/마감 TODO보다 뒤에 둔다. |
+| delayed_until | no | 반자동 지연 후 새 기준일 |
+| category | no | 업무 유형. 예: admin, ops, development, finance, event, other |
+| visibility | yes | 노출/알림 범위. 값: private, office, shared, public |
+| requester_id | no | 요청자. 확장 필드 |
+| assignee_id | yes | 담당자. MVP 핵심 필드 |
+| collaborators | no | 공동 작업자 목록 |
+| reviewer_id | no | 확인자. 확장 필드 |
+| source_discord_message_id | no | 원본 Discord message id |
+| result_note | no | 결과 메모 |
+| result_link | no | 결과 링크 |
+| attachment_url | no | 첨부 파일 |
 | created_by | yes | 생성자 |
 | created_at | yes | timestamp |
 | updated_at | yes | timestamp |
 
-### Related Party
+### 6.2 Reminder Rule
 
 | 필드 | 필수 | 메모 |
 | --- | --- | --- |
-| id | yes | 내부 id |
-| name | yes | 사람/단체 이름 |
-| type | yes | person, organization |
-| contact | no | 전화번호/email/etc |
+| todo_id | yes | 연결 TODO |
+| target_scope | yes | private_dm, office_channel, public_channel |
+| target_discord_id | yes | DM user id 또는 channel id |
+| remind_at | yes | 알림 시간 |
+| status | yes | pending, sent, cancelled |
 
 ## 7. 사용자 Flow
 
-### 7.1 일정 생성
+### 7.1 TODO 생성
 
 1. 사용자가 `#todo`에서 `/todo add`를 입력한다.
-2. Bot이 일정 입력 modal/form을 연다.
-3. 사용자가 일정명을 입력한다.
-4. 사용자가 일정내용을 입력한다.
-5. 사용자가 일정 시간과 예상 소요 시간을 입력한다.
-6. 사용자가 위치를 입력한다.
-7. 사용자가 관련 사람/단체를 선택한다.
-8. 사용자가 일정 타입을 선택한다.
-9. 기본 상태는 `wait`로 저장된다.
+2. Bot이 제목, 설명, 마감일, 담당자, 공개 범위를 받는다.
+3. 선택 값으로 공동 작업자, 확인자, 요청자, 결과 링크/첨부를 받는다.
+4. 기본 상태는 `wait`로 저장된다.
+5. Bot이 생성 요약과 다음 행동을 응답한다.
 
-### 7.2 상태 관리
+### 7.2 TODO 목록 확인
 
-1. 사용자가 `#todo`에서 `/todo list`로 일정 리스트를 본다.
-2. 사용자가 `/todo status` 또는 버튼으로 상태를 `progress`로 변경한다.
-3. 일정 완료 후 결과물 메모/link/file을 첨부한다.
-4. 사용자가 상태를 `done`으로 변경한다.
-5. 취소/제외된 일정은 `dismiss`로 변경한다.
+1. 사용자가 `/todo list`를 입력한다.
+2. Bot이 오늘/미완료/본인 담당 TODO를 우선 정렬한다.
+3. 사용자는 필터로 담당자, 공개 범위, 상태, 지연 여부를 볼 수 있다.
+4. 긴 목록은 page 또는 요약 + 상세 조회로 나눈다.
 
-### 7.3 경로와 이동 시간
+### 7.3 상태 변경
 
-1. 사용자가 위치가 있는 일정을 연다.
-2. Bot이 지도 링크 버튼을 보여준다.
-3. 네이버 지도 등 외부 지도 앱으로 이동한다.
-4. 같은 날짜에 위치가 있는 일정이 여러 개면 시스템이 이동 시간 후보를 보여준다.
+1. 사용자가 `/todo status` 또는 버튼으로 상태를 변경한다.
+2. 상태 값은 `wait`, `progress`, `done`, `dismiss` 중 하나다.
+3. 완료 시 결과 메모/link/file을 남길 수 있다.
+4. `done`과 `dismiss`는 active 목록 아래로 내려간다.
+
+### 7.4 지연 처리
+
+1. 사용자가 `/todo delay` 또는 목록 버튼으로 미완료 TODO를 선택한다.
+2. Bot이 `내일`, `3일 뒤`, `직접 지정 날짜` 후보를 제공한다.
+3. 사용자가 선택하면 `delayed_until`과 `due_at`을 갱신한다.
+4. 반복 지연된 TODO는 목록에서 표시한다.
+
+### 7.5 알림
+
+1. TODO의 공개 범위와 권한을 기준으로 알림 위치를 결정한다.
+2. 개인 TODO는 개인 DM으로 알린다.
+3. 사무국 TODO는 사무국 채널로 알린다.
+4. 전체 공유 TODO는 전체 채널로 알린다.
 
 ## 8. 기능 요구사항
 
 | ID | 요구사항 | 우선순위 |
 | --- | --- | --- |
-| TODO-FE-001 | 일정 생성 form을 제공한다. | P0 |
-| TODO-FE-002 | `#todo`에서 `/todo list`를 제공한다. | P0 |
-| TODO-FE-003 | `/todo status` 또는 버튼으로 상태 변경을 제공한다. | P0 |
-| TODO-FE-004 | 일정 타입 필터를 제공한다. | P1 |
-| TODO-FE-005 | 결과물 메모/link/file 첨부를 제공한다. | P1 |
-| TODO-FE-006 | Discord message의 지도 링크 버튼으로 지도 앱에 연결한다. | P1 |
-| TODO-FE-007 | 같은 날짜 일정의 예상 이동 시간을 보여준다. | P2 |
-| TODO-FE-008 | 사람/단체 연결을 제공한다. | P1 |
+| TODO-001 | `#todo`에서 `/todo add`를 제공한다. | P0 |
+| TODO-002 | `#todo`에서 `/todo list`를 제공한다. | P0 |
+| TODO-003 | `/todo status` 또는 버튼으로 상태 변경을 제공한다. | P0 |
+| TODO-004 | `/todo delay`로 반자동 지연 처리를 제공한다. | P0 |
+| TODO-005 | 담당자 필드를 필수로 저장한다. | P0 |
+| TODO-006 | 공동 작업자, 확인자, 요청자를 선택 필드로 저장할 수 있다. | P1 |
+| TODO-007 | 개인/사무국/공동/전체 공개 범위를 구분한다. | P0 |
+| TODO-008 | 공개 범위별 알림 위치를 분리한다. | P0 |
+| TODO-009 | 반복 지연된 TODO를 목록에서 드러낸다. | P1 |
+| TODO-010 | Google Sheets 연동을 위한 저장소 boundary를 둔다. | P1 |
+| TODO-011 | 자연어/음성 입력을 후속 확장으로 검토한다. | P2 |
 
 ## 9. 정렬 요구사항
 
-초기 리스트 정렬 후보:
+초기 목록 정렬:
 
-1. 오늘 일정 먼저.
-2. 시작 시간이 가까운 순.
-3. 상태가 `wait` 또는 `progress`인 일정 먼저.
-4. `done`과 `dismiss`는 아래로 내림.
-5. 같은 날짜 안에서는 시작 시간순.
+1. 오늘 마감 또는 오늘 알림 TODO 먼저.
+2. 상태가 `wait` 또는 `progress`인 TODO 먼저.
+3. 담당자가 본인인 TODO 먼저.
+4. `due_at`이 없는 TODO는 마감이 있는 active TODO 뒤에 배치한다.
+5. 지연된 TODO는 별도 표시.
+6. `done`과 `dismiss`는 active work 아래로 내림.
+7. 같은 날짜 안에서는 due time 순.
 
-정렬은 사용자 관찰 후 확정한다.
+## 10. 알림 정책
 
-## 10. 지도 요구사항
+| 공개 범위 | 기본 알림 위치 |
+| --- | --- |
+| private | 개인 DM |
+| office | 사무국 채널 |
+| shared | 관련 담당자/공동 작업자 DM 또는 지정 thread |
+| public | 전체 채널 |
 
-MVP:
+MVP에서는 알림 위치를 설정으로 고정하고, 복잡한 권한 정책은 후속 작업으로 둔다.
 
-1. 위치/주소를 저장한다.
-2. 네이버 지도 검색 URL 또는 앱 deep link로 연결한다.
+## 11. Google Workspace/LLM 연동 방향
 
-Later:
+1. Google Sheets는 운영자가 보기 쉬운 TODO 표 또는 prototype 저장소 후보로 유지한다.
+2. Google Tasks/Calendar 양방향 동기화는 MVP 이후 검토한다.
+3. LLM/음성 입력은 Discord 텍스트 UX를 보완할 수 있지만 저장 전 확인 단계가 필요하다.
+4. Provider 선택은 비용, Google Workspace 제어 가능성, 범용성, 환각 위험을 비교해 결정한다.
 
-1. Naver Cloud Directions API로 이동 시간과 경로 정보를 조회한다.
-2. 같은 날짜 일정 간 이동 시간을 계산한다.
-3. 예상 소요 시간과 이동 시간을 합쳐 하루 일정 부담을 보여준다.
+## 12. 인수 조건
 
-## 11. 인수 조건
+1. 사용자는 `#todo`에서 TODO를 생성할 수 있다.
+2. 사용자는 본인 또는 지정 범위의 미완료 TODO 목록을 볼 수 있다.
+3. 사용자는 TODO 상태를 `wait`, `progress`, `done`, `dismiss`로 변경할 수 있다.
+4. 사용자는 미완료 TODO를 내일/며칠 뒤/지정 날짜로 미룰 수 있다.
+5. TODO에는 담당자가 필수로 저장된다.
+6. 개인/사무국/공동/전체 범위가 저장되고 응답에 표시된다.
+7. 알림은 공개 범위에 따라 DM/사무국 채널/전체 채널로 분리된다.
+8. 외부 provider 없이도 fake/local storage로 테스트할 수 있다.
 
-1. 사용자는 일정명, 내용, 시간, 예상 소요 시간, 위치, 관련 사람/단체를 저장할 수 있다.
-2. 사용자는 일정 상태를 변경할 수 있다.
-3. 사용자는 일정 타입을 지정할 수 있다.
-4. 사용자는 결과물 메모 또는 링크를 남길 수 있다.
-5. 일정 리스트는 오늘/미완료 중심으로 정렬된다.
-6. 위치가 있는 일정은 지도 앱으로 이동할 수 있다.
-7. `#todo`에서 일정 생성, 조회, 상태 변경이 가능하다.
+## 13. 위험
 
-## 12. 위험
+1. Discord 입력이 길어지면 기존 Google 도구보다 불편해질 수 있다.
+2. 자동 지연은 사용자 의도와 다르게 TODO를 숨길 수 있다.
+3. 권한/공개 범위를 과하게 만들면 MVP가 무거워진다.
+4. Google Workspace 연동을 먼저 만들면 요구사항 변경 비용이 커진다.
+5. LLM을 필수 경로로 두면 비용과 환각 위험이 커진다.
 
-1. 기존 일정 관리보다 입력이 많아지면 실패한다.
-2. 이동 시간 계산은 구현 비용이 높고 실제 빈도가 낮을 수 있다.
-3. DB를 먼저 만들면 요구사항이 틀렸을 때 수정 비용이 커진다.
-4. `todo-manager`가 `sns-manager`/`receipt-manager`보다 넓어서 제품 초점이 흐려질 수 있다.
+## 14. 미결정 사항
 
-## 13. 미결정 사항
+1. 첫 저장소는 Google Sheets, PostgreSQL, local/fake storage 중 무엇인가?
+2. `/todo add`는 slash option 중심인가, modal 중심인가?
+3. `shared` 범위의 알림은 DM 묶음, thread, 채널 중 어디로 보낼 것인가?
+4. 지연 횟수 표시 기준은 몇 회부터인가?
+5. Google Tasks/Calendar 동기화는 단방향인가, 양방향인가?
+6. 자연어/음성 입력은 언제 MVP 후보로 승격할 것인가?
 
-1. 현재 사용하는 일정 관리 방법은 무엇인가?
-2. 기존 방식에서 가장 불편한 점은 무엇인가?
-3. 일정의 owner가 필요한가?
-4. 관련 사람/단체 데이터는 `receipt-manager` 서비스의 People Sheet와 공유할 것인가?
-5. 지도는 네이버 지도만 지원하면 되는가?
-6. 앱 API로 이동 방법/시간을 가져오는 것이 MVP에 꼭 필요한가?
-7. Discord message로 긴 일정 목록을 보여줄 때 pagination이 필요한가?
+## 15. 참고
 
-## 14. 참고
-
-- Naver Cloud Directions API는 driving route, duration, distance, toll 등 경로 데이터를 반환할 수 있다: https://api.ncloud-docs.com/docs/en/ai-naver-mapsdirections-driving
+- 전사 정리: `docs/todo_domain_transcript.md`
+- Discord command spec: `docs/discord-command-spec.md`
+- 실행 TODO: `docs/todos-todo.md`
