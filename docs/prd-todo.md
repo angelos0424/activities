@@ -65,6 +65,202 @@ Activities Todo 문서의 현재 실행 방향은 Discord 특정 채널에서 sl
 4. 첫 도메인 명령은 외부 provider 없이도 로컬 테스트가 가능하다.
 5. 웹/OCR/회의록/리포트 작업은 아래 legacy section에 보존되며 현재 실행 큐와 분리된다.
 
+## Todo Domain PRD
+
+Status: active MVP candidate. This section defines the Todo command contract
+well enough that an implementer can write the first handler tests and acceptance
+criteria without reading legacy web/OCR plans.
+
+### Todo Goal
+
+Todo lets a Discord channel capture lightweight work items, review open work,
+and mark items done without leaving the channel. MVP scope is intentionally
+small: one task list per configured Discord channel, three slash commands, and a
+minimal record shape that can later move to PostgreSQL, Google Sheets, or another
+storage boundary.
+
+### Todo Target Users
+
+| User | Need |
+| --- | --- |
+| Requester | Capture a task while context is fresh in Discord. |
+| Assignee | See tasks assigned to them and know title, requester, and due date. |
+| Channel operator | Review open channel tasks and close completed work. |
+
+### Todo MVP Non-goals
+
+1. External task system sync, including Jira, Linear, Asana, Notion, or GitHub
+   Issues synchronization.
+2. Complex workflow states beyond `open` and `done`.
+3. Web UI, mobile UI, browser dashboard, or admin screen implementation.
+4. Recurring tasks, subtasks, dependencies, labels, priority scoring, reminders,
+   or calendar integration.
+5. Cross-server or multi-tenant organization management.
+6. AI-generated task rewriting, summarization, prioritization, or assignment.
+
+### Todo Record Shape
+
+The MVP Todo record must preserve enough Discord context to audit who created a
+task, where it came from, and who is expected to act.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | yes | Stable task id returned by `/todo-add` and accepted by `/todo-done`. |
+| `title` | yes | User-entered task title after trimming whitespace. |
+| `status` | yes | `open` on creation, `done` after completion. |
+| `requester` | yes | Discord user id of the command requester. |
+| `assignee` | no | Discord user id parsed from a user mention; omitted when unassigned. |
+| `source_discord_message_id` | yes | Discord interaction or source message id used for traceability and duplicate defense. |
+| `due_date` | no | ISO calendar date (`YYYY-MM-DD`) with no time component. |
+| `created_at` | yes | Server timestamp when the record is created. |
+| `updated_at` | yes | Server timestamp when the record last changes. |
+| `completed_at` | no | Server timestamp set when status becomes `done`. |
+
+Minimum status transition:
+
+```text
+/todo-add
+   |
+   v
+open -- /todo-done <id> --> done
+```
+
+### Todo Slash Command Candidates
+
+| Command | Purpose | Required inputs | Optional inputs |
+| --- | --- | --- | --- |
+| `/todo-add` | Create a new todo record. | `title` | `assignee`, `due` |
+| `/todo-list` | Show current todo records for the channel. | none | `status`, `assignee` |
+| `/todo-done` | Mark an open todo as done. | `id` | none |
+
+### Todo Input Validation Rules
+
+1. `title` is required for `/todo-add` after trimming whitespace.
+2. `title` length must be 1-120 characters after trimming.
+3. `due` is optional. When present, it must match `YYYY-MM-DD` and be a valid
+   calendar date.
+4. `assignee` is optional. When present, it must be a Discord user mention that
+   resolves to a Discord user id, such as `<@123>` or `<@!123>`.
+5. Invalid, role, channel, or free-text assignee values must return a validation
+   failure instead of creating a task.
+6. `/todo-done id` is required and must match an existing open todo visible to
+   the command context.
+7. `/todo-list` must handle an empty result set with a clear empty-list message
+   instead of an error.
+8. Validation failures must not create, update, or complete a todo record.
+
+### Todo User Flows and Acceptance Criteria
+
+#### `/todo-add`
+
+User flow:
+
+1. User runs `/todo-add title:<text>` in an allowed Discord channel.
+2. User may include `assignee:<user mention>` and `due:<YYYY-MM-DD>`.
+3. Bot validates title, assignee mention, due date, and channel guardrails.
+4. Bot creates an `open` todo record with requester, optional assignee, optional
+   due date, source Discord message id, and timestamps.
+5. Bot replies with task id, title, status, assignee if present, due date if
+   present, and the next action: `/todo-list` or `/todo-done id:<id>`.
+
+Acceptance criteria:
+
+1. Given a valid title, the bot creates one `open` todo and returns its `id`.
+2. Given a valid assignee mention, the record stores the assignee Discord user id
+   and the response renders the assignee as a Discord mention.
+3. Given no assignee, the record is created with no assignee rather than failing.
+4. Given a valid due date, the record stores the exact ISO date provided.
+5. Given no due date, the record is created with `due_date = null`.
+6. Given a missing or blank title, the bot returns a validation failure and
+   creates no record.
+7. Given a title longer than 120 characters, the bot returns a validation failure
+   and creates no record.
+8. Given an invalid due date format or impossible calendar date, the bot returns
+   a validation failure and creates no record.
+9. Given an invalid assignee value, the bot returns a validation failure and
+   creates no record.
+10. Given a command from a disallowed channel, the bot rejects it before Todo
+    handling creates a record.
+
+#### `/todo-list`
+
+User flow:
+
+1. User runs `/todo-list` in an allowed Discord channel.
+2. User may filter by `status` or `assignee` if those options are implemented in
+   the first command registration.
+3. Bot validates filters and channel guardrails.
+4. Bot returns matching todos ordered by creation time or due date. The ordering
+   rule must be explicit in the implementation contract before coding.
+5. Bot returns a friendly empty-list response when no records match.
+
+Acceptance criteria:
+
+1. Given open todos exist, `/todo-list` returns each task id, title, status,
+   requester, assignee if present, and due date if present.
+2. Given no todos exist, `/todo-list` returns a clear empty-list response.
+3. Given only completed todos exist and default list scope is open todos, the bot
+   returns the empty-list response unless `status:done` is requested.
+4. Given an unsupported status filter, the bot returns a validation failure.
+5. Given an invalid assignee filter, the bot returns a validation failure.
+6. Given a command from a disallowed channel, the bot rejects it before Todo
+   handling reads records.
+
+#### `/todo-done`
+
+User flow:
+
+1. User runs `/todo-done id:<todo id>` in an allowed Discord channel.
+2. Bot validates id presence, channel guardrails, and record visibility.
+3. Bot changes the matching open record status from `open` to `done`.
+4. Bot sets `updated_at` and `completed_at`.
+5. Bot replies with completed task id, title, previous status, new status, and
+   who completed it.
+
+Acceptance criteria:
+
+1. Given an existing open todo id, `/todo-done` marks exactly that todo as
+   `done`.
+2. Given success, the response includes id, title, and completed status.
+3. Given a missing id, the bot returns a validation failure and updates no
+   records.
+4. Given an unknown id, the bot returns a not-found response and updates no
+   records.
+5. Given an already done id, the command is idempotent from the user's
+   perspective: it must not create another completion event, and it must clearly
+   say the task is already done.
+6. Given a command from a disallowed channel, the bot rejects it before Todo
+   handling updates records.
+
+### Todo Response Policy
+
+MVP responses must be concise and actionable:
+
+1. Success responses include the command result and the next useful command.
+2. Validation failures name the invalid field and expected format.
+3. Permission failures explain that the command is only available in configured
+   channels.
+4. Internal errors avoid stack traces and tell the user whether retrying is safe.
+5. Empty-list responses are normal success responses, not errors.
+
+### Todo Open Questions
+
+These decisions are intentionally separated from MVP acceptance criteria so they
+do not block the first command contract.
+
+1. Should Todo responses be public in-channel, ephemeral to the requester, or
+   command-specific?
+2. Can any allowed-channel user complete any todo, or only requester, assignee,
+   or a Discord role?
+3. Is the default `/todo-list` scope all open channel todos, only todos assigned
+   to the requester, or both via filters?
+4. Should due dates use UTC, a configured server timezone, or a per-guild
+   timezone once reminders exist?
+5. Should the first durable storage target be PostgreSQL, Google Sheets, or a
+   fake/in-memory implementation for handler tests only?
+6. Should bot responses be Korean-only, English-only, or match the command
+   input language?
+
 ## Superseded Legacy Web/OCR/Meeting Plan
 
 아래 내용은 기존 웹 앱, OCR, 회의록 분석, 리포트 화면 중심 계획을 보존한 것이다.
