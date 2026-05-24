@@ -5,6 +5,14 @@
 
 목표: `#todo`에서 Discord 기반 `todo-manager` flow를 정의하고 검증한다.
 
+## Document Paths and Source of Truth
+
+- Current Todo TODO 기준 문서: `docs/todos-todo.md`.
+- Compatibility path: root `TODOS.md` is retained as a pointer to service-specific
+  TODO documents so older references do not create a second TODO source of truth.
+- Decision: keep Todo execution tasks in `docs/todos-todo.md`; keep product
+  requirements in `docs/prd-todo.md`.
+
 ## 사용자 조사
 
 - [x] 현재 일정/TODO 사용 방식을 정리한다.
@@ -70,7 +78,7 @@
 
 - [ ] 1. Write the Todo command contract.
   - Scope:
-    - Define `/todo add` with required assignee and visibility, optional due date,
+    - Define `/todo add` with required assignee and visibility, optional due_at,
       optional collaborators, optional reviewer, and optional requester.
     - Define `/todo list` with status, assignee, visibility, and delayed filters.
     - Define `/todo status` with `wait`, `progress`, `done`, and `dismiss`.
@@ -79,9 +87,9 @@
       empty-list text, and unknown todo behavior for each command.
     - Use stable, human-friendly task IDs such as `#1` for user-facing command
       input instead of UUIDs or Discord Snowflakes.
-    - Define `/todo list` default ordering as today/incomplete/own assignments
-      first, then due date ascending, null due dates last, then creation time
-      ascending.
+    - Define `/todo list` default ordering as active TODO first, own assignments
+      next, then due_at ascending, null due_at last, and creation time ascending
+      as the tie-breaker.
   - Candidate output files:
     - `docs/discord-command-spec.md`
     - `sns/src/domains/todo/README.md`
@@ -92,6 +100,8 @@
     - The contract states that Discord core channel enforcement runs before Todo
       handlers.
     - The contract names MVP-supported statuses and delayed-state behavior.
+    - Success responses and validation failure responses are documented as
+      separate cases; validation failures do not write to storage.
   - Validation:
     - Markdown review confirms add/list/status/delay are specified without
       relying on unresolved storage or language policy decisions.
@@ -104,8 +114,9 @@
     - Enforce the maximum title length chosen in the command contract.
     - Parse required assignee and visibility values.
     - Trim optional description/result note values and enforce the contract's
-      maximum lengths.
-    - Parse optional due dates and delay target dates; reject unsupported formats.
+      maximum lengths, including the current `description` limit of 1000 chars.
+    - Parse optional due_at values and delay target dates; reject unsupported
+      formats.
     - Parse optional collaborators, reviewer, and requester Discord user values
       without requiring a separate identity mapping system.
     - Validate status/delay commands reject missing or malformed human-friendly
@@ -121,9 +132,9 @@
     - Invalid input never reaches storage or mutating handler logic.
   - Validation:
     - Unit tests cover missing title, blank title, maximum length boundary,
-      over-limit title, missing assignee, invalid visibility, valid due date,
-      invalid due date, valid collaborators/reviewer/requester, missing status
-      ID, malformed status ID, and invalid delay target.
+      over-limit title, missing assignee, invalid visibility, valid due_at,
+      invalid due_at, valid collaborators/reviewer/requester, missing status ID,
+      malformed status ID, and invalid delay target.
     - Tests assert both the validation status and the user-visible failure
       content expected by the command contract.
 
