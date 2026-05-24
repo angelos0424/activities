@@ -155,8 +155,8 @@ Status: active domain PRD for Discord-first Activities MVP.
 | `title` | yes | trim 후 1-120자 |
 | `assignee` | yes | Discord user mention 또는 resolve 가능한 user id |
 | `visibility` | yes | `private`, `office`, `shared`, `public` |
-| `due` | no | `YYYY-MM-DD` 또는 command contract가 정한 날짜 입력 |
-| `description` | no | 길이 제한은 command contract에서 확정 |
+| `due_at` | no | `YYYY-MM-DD` 또는 command contract가 정한 날짜 입력 |
+| `description` | no | trim 후 최대 1000자 |
 | `collaborators` | no | Discord user mention 목록 |
 | `reviewer` | no | Discord user mention |
 | `requester` | no | 생략 시 command requester |
@@ -166,8 +166,8 @@ Acceptance criteria:
 1. 유효한 입력이면 `wait` 상태 TODO 1건을 만들고 human-friendly id를 반환한다.
 2. 담당자와 공개 범위는 필수로 저장한다.
 3. 선택 필드는 입력된 경우에만 저장하고, 누락되어도 생성은 실패하지 않는다.
-4. 잘못된 title, assignee, visibility, due date는 validation failure를 반환하고 레코드를 만들지 않는다.
-5. 응답에는 id, title, status, assignee, visibility, due date가 포함된다.
+4. 잘못된 title, assignee, visibility, due_at은 validation failure를 반환하고 레코드를 만들지 않는다.
+5. 성공 응답에는 id, title, status, assignee, visibility, due_at이 포함된다.
 
 ### 8.3 `/todo list`
 
@@ -182,17 +182,12 @@ Acceptance criteria:
 
 정렬:
 
-1. 오늘 마감 또는 오늘 알림 TODO.
-2. `wait`/`progress` 상태의 active TODO.
-3. 본인 담당 TODO.
-4. `due_at` 오름차순.
-5. `due_at`이 없는 TODO는 마감이 있는 TODO 뒤.
-6. 같은 날짜 안에서는 생성 시간 오름차순.
-7. `done`/`dismiss`는 active work 아래.
+기본 정렬은 `10. 정렬 요구사항`을 따른다. 이 섹션에서는 `/todo list`가
+해당 정렬 규칙을 적용해야 한다는 점만 명시한다.
 
 Acceptance criteria:
 
-1. 조건에 맞는 TODO가 있으면 id, title, status, assignee, visibility, due date를 표시한다.
+1. 조건에 맞는 TODO가 있으면 id, title, status, assignee, visibility, due_at을 표시한다.
 2. 조건에 맞는 TODO가 없으면 명확한 empty-list 응답을 반환한다.
 3. 지원하지 않는 status, visibility, assignee filter는 validation failure를 반환한다.
 4. 긴 목록은 pagination 또는 요약 + 상세 조회로 분리할 수 있다.
@@ -251,13 +246,14 @@ Acceptance criteria:
 
 초기 목록 정렬:
 
-1. 오늘 마감 또는 오늘 알림 TODO 먼저.
-2. 상태가 `wait` 또는 `progress`인 TODO 먼저.
-3. 담당자가 본인인 TODO 먼저.
-4. `due_at`이 없는 TODO는 마감이 있는 active TODO 뒤에 배치한다.
-5. 지연된 TODO는 별도 표시.
-6. `done`과 `dismiss`는 active work 아래로 내림.
-7. 같은 날짜 안에서는 due time 순.
+1. 상태가 `wait` 또는 `progress`인 active TODO 먼저.
+2. 담당자가 본인인 TODO 먼저.
+3. 오늘 마감 또는 오늘 알림 TODO 먼저.
+4. `due_at` 오름차순.
+5. `due_at`이 없는 TODO는 마감이 있는 active TODO 뒤에 배치한다.
+6. 지연된 TODO는 별도 표시.
+7. `done`과 `dismiss`는 active work 아래로 내림.
+8. 같은 `due_at` 안에서는 생성 시간 오름차순.
 
 ## 11. 알림 정책
 

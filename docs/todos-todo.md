@@ -86,13 +86,14 @@
   - 공개 범위 필수.
   - 마감일 optional.
   - 공동 작업자/확인자/요청자 optional.
-  - 생성 응답에는 human-friendly id, task summary, validation failure text,
-    empty-list 이후 다음 행동 안내를 포함한다.
+  - 성공 응답에는 human-friendly id, task summary, 다음 행동 안내를 포함한다.
+  - 실패 응답에는 validation failure text를 포함하고 저장소 write를 하지 않는다.
 
 - [ ] `/todo list` command contract를 갱신한다.
   - 오늘/미완료/본인 담당 우선 정렬.
   - 상태, 담당자, 공개 범위, 지연 여부 filter.
-  - `due_at` 오름차순, null due date last, 생성 시간 오름차순 규칙을 명시한다.
+  - active TODO 우선, 본인 담당 우선, `due_at` 오름차순, null due_at last,
+    생성 시간 오름차순 규칙을 명시한다.
   - 긴 목록 pagination 또는 요약 + 상세 조회.
   - 결과가 없을 때는 오류가 아닌 empty-list 성공 응답을 반환한다.
 
