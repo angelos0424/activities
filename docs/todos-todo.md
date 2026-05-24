@@ -68,45 +68,143 @@
 
 ## 엔지니어링 계획
 
-- [ ] `todo-manager` record shape를 구현한다.
-  - `id`, `title`, `description`, `status`, `due_at`, `delayed_until`.
-  - `visibility`, `assignee_id`, `collaborators`, `reviewer_id`, `requester_id`.
-  - `source_discord_message_id`, `result_note`, `result_link`, `attachment_url`.
+- [ ] 1. Write the Todo command contract.
+  - Scope:
+    - Define `/todo add` with required assignee and visibility, optional due date,
+      optional collaborators, optional reviewer, and optional requester.
+    - Define `/todo list` with status, assignee, visibility, and delayed filters.
+    - Define `/todo status` with `wait`, `progress`, `done`, and `dismiss`.
+    - Define `/todo delay` with `내일`, `3일 뒤`, and direct date selection.
+    - Specify success responses, validation failures, permission failures,
+      empty-list text, and unknown todo behavior for each command.
+    - Use stable, human-friendly task IDs such as `#1` for user-facing command
+      input instead of UUIDs or Discord Snowflakes.
+    - Define `/todo list` default ordering as today/incomplete/own assignments
+      first, then due date ascending, null due dates last, then creation time
+      ascending.
+  - Candidate output files:
+    - `docs/discord-command-spec.md`
+    - `sns/src/domains/todo/README.md`
+    - or a code-adjacent command contract file under the bot service.
+  - Completion criteria:
+    - Each command has inputs, normalized handler request shape, output message
+      examples, and failure cases.
+    - The contract states that Discord core channel enforcement runs before Todo
+      handlers.
+    - The contract names MVP-supported statuses and delayed-state behavior.
+  - Validation:
+    - Markdown review confirms add/list/status/delay are specified without
+      relying on unresolved storage or language policy decisions.
+    - Future implementation issues can copy one command section as their scope
+      without needing additional discovery.
 
-- [ ] `/todo add` command contract를 갱신한다.
-  - 담당자 필수.
-  - 공개 범위 필수.
-  - 마감일 optional.
-  - 공동 작업자/확인자/요청자 optional.
+- [ ] 2. Implement Todo input validation.
+  - Scope:
+    - Validate `title` is present after trimming whitespace.
+    - Enforce the maximum title length chosen in the command contract.
+    - Parse required assignee and visibility values.
+    - Trim optional description/result note values and enforce the contract's
+      maximum lengths.
+    - Parse optional due dates and delay target dates; reject unsupported formats.
+    - Parse optional collaborators, reviewer, and requester Discord user values
+      without requiring a separate identity mapping system.
+    - Validate status/delay commands reject missing or malformed human-friendly
+      IDs.
+  - Candidate output files:
+    - `sns/src/domains/todo/.../TodoCommandValidator.*`
+    - `sns/src/domains/todo/.../TodoCommandValidatorTest.*`
+    - or equivalent files in the selected bot service structure.
+  - Completion criteria:
+    - Validation returns structured success or failure results, not raw strings.
+    - Failure results include stable error codes plus user-facing message keys or
+      message text.
+    - Invalid input never reaches storage or mutating handler logic.
+  - Validation:
+    - Unit tests cover missing title, blank title, maximum length boundary,
+      over-limit title, missing assignee, invalid visibility, valid due date,
+      invalid due date, valid collaborators/reviewer/requester, missing status
+      ID, malformed status ID, and invalid delay target.
+    - Tests assert both the validation status and the user-visible failure
+      content expected by the command contract.
 
-- [ ] `/todo list` command contract를 갱신한다.
-  - 오늘/미완료/본인 담당 우선 정렬.
-  - 상태, 담당자, 공개 범위, 지연 여부 filter.
-  - 긴 목록 pagination 또는 요약 + 상세 조회.
+- [ ] 3. Define the Todo record shape.
+  - Scope:
+    - Define fields: `id`, `title`, `description`, `status`, `due_at`,
+      `delayed_until`, `visibility`, `assignee_id`, `collaborators`,
+      `reviewer_id`, `requester_id`, `source_discord_message_id`, `result_note`,
+      `result_link`, `attachment_url`, `created_at`, `updated_at`, and
+      `completed_at`.
+    - Define allowed MVP status transitions for `wait`, `progress`, `done`, and
+      `dismiss`.
+    - Define whether timestamps are UTC instants or date-only fields.
+    - Keep persistence annotations out until the permanent storage decision is
+      made.
+  - Candidate output files:
+    - `sns/src/domains/todo/.../TodoRecord.*`
+    - `sns/src/domains/todo/.../TodoStatus.*`
+    - `sns/src/domains/todo/.../TodoRecordTest.*`
+    - or equivalent files in the selected bot service structure.
+  - Completion criteria:
+    - The record shape is independent from Discord SDK objects.
+    - The record can represent tasks created by `/todo add`, returned by
+      `/todo list`, updated by `/todo status`, and delayed by `/todo delay`.
+    - Completion sets `completed_at`; non-completed states leave it empty.
+  - Validation:
+    - Unit tests cover record construction, default status, optional fields,
+      timestamp assignment, status transitions, delay state, and completed time.
+    - Static review confirms no permanent storage dependency leaks into the
+      record shape.
 
-- [ ] `/todo status` command contract를 갱신한다.
-  - `wait`, `progress`, `done`, `dismiss`.
-  - 완료 시 결과 메모/link/file 확장 가능.
+- [ ] 4. Implement Todo handlers with fake/local storage.
+  - Scope:
+    - Create a small storage boundary for add, list, find-by-id, status update,
+      and delay update.
+    - Implement fake/local storage for tests and scaffold development.
+    - Implement add, list, status, and delay handlers against the storage
+      boundary.
+    - Keep fake storage explicitly non-production and resettable between tests.
+  - Candidate output files:
+    - `sns/src/domains/todo/.../TodoStorage.*`
+    - `sns/src/domains/todo/.../InMemoryTodoStorage.*`
+    - `sns/src/domains/todo/.../TodoCommandHandler.*`
+    - `sns/src/domains/todo/.../TodoCommandHandlerTest.*`
+    - or equivalent files in the selected bot service structure.
+  - Completion criteria:
+    - `/todo add` stores a normalized `TodoRecord` and returns the created
+      summary.
+    - `/todo list` returns empty-state output and filtered open/done/delayed
+      results with the contract ordering.
+    - `/todo status` updates an existing item or returns a clear not-found
+      failure.
+    - `/todo delay` records the selected delay target and exposes repeat-delay
+      count or equivalent audit data.
+    - Handler code depends on the storage boundary, not on a concrete permanent
+      database or sheet client.
+  - Validation:
+    - Unit tests use fake/local storage and do not require external credentials.
+    - Tests cover add success, list empty, list with items, list filtering,
+      status change, delay success, unknown ID, and validation failure
+      passthrough.
 
-- [ ] `/todo delay` command contract를 추가한다.
-  - `내일`, `3일 뒤`, `직접 지정 날짜`.
-  - 반복 지연 횟수 표시.
+- [ ] 5. Add command-boundary tests.
+  - Scope:
+    - Test the Discord command adapter that maps slash command input into Todo
+      handler requests.
+    - Verify command responses match the Todo command contract.
+    - Reuse Discord bot core fakes for requester, channel, and message IDs.
+  - Completion criteria:
+    - Command-boundary tests cover add, list, status, and delay success paths.
+    - Permission/channel enforcement remains outside Todo handler logic.
+  - Validation:
+    - Tests pass without Discord, Google, database, or LLM provider credentials.
 
-- [ ] 공개 범위별 reminder routing boundary를 만든다.
-  - `private_dm`.
-  - `office_channel`.
-  - `public_channel`.
-
-- [ ] fake/local storage로 todo handler test를 먼저 작성한다.
-  - add success.
-  - missing title.
-  - missing assignee.
-  - invalid due date.
-  - delay success.
-  - list sorting.
-  - status change.
-
-- [ ] Google Sheets 연동 여부를 결정한 뒤 storage interface를 확장한다.
+- [ ] 6. Decide and extend permanent storage.
+  - Scope:
+    - Choose Google Sheet-backed prototype, PostgreSQL, or another store.
+    - Extend the storage interface only after fake/local handler behavior is
+      locked by tests.
+  - Validation:
+    - Storage implementation has contract tests shared with fake/local storage.
 
 - [ ] Google Tasks/Calendar 연동은 MVP 이후 issue로 분리한다.
 
