@@ -6,6 +6,14 @@ Source:
 
 Status: active domain PRD for Discord-first Activities MVP.
 
+## Document Paths and Source of Truth
+
+- Current Todo PRD 기준 문서: `docs/prd-todo.md`.
+- Compatibility path: `docs/prd.md` is retained as a pointer to service-specific
+  PRD documents so older references do not create a second PRD source of truth.
+- Decision: keep Todo product requirements in `docs/prd-todo.md`; keep execution
+  tasks in `docs/todos-todo.md`.
+
 ## 1. 요약
 
 `todo-manager`는 Discord `#todo` 채널에서 개인/사무국/공동 작업 TODO를 생성, 조회, 지연, 상태 변경, 알림 처리하는 서비스다.

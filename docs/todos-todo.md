@@ -5,6 +5,14 @@
 
 목표: `#todo`에서 Discord 기반 `todo-manager` flow를 정의하고 검증한다.
 
+## Document Paths and Source of Truth
+
+- Current Todo TODO 기준 문서: `docs/todos-todo.md`.
+- Compatibility path: root `TODOS.md` is retained as a pointer to service-specific
+  TODO documents so older references do not create a second TODO source of truth.
+- Decision: keep Todo execution tasks in `docs/todos-todo.md`; keep product
+  requirements in `docs/prd-todo.md`.
+
 ## 사용자 조사
 
 - [x] 현재 일정/TODO 사용 방식을 정리한다.
