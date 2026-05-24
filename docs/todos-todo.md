@@ -5,6 +5,14 @@
 
 목표: `#todo`에서 Discord 기반 `todo-manager` flow를 정의하고 검증한다.
 
+## Document Paths and Source of Truth
+
+- Current Todo TODO 기준 문서: `docs/todos-todo.md`.
+- Compatibility path: root `TODOS.md` is retained as a pointer to service-specific
+  TODO documents so older references do not create a second TODO source of truth.
+- Decision: keep Todo execution tasks in `docs/todos-todo.md`; keep product
+  requirements in `docs/prd-todo.md`.
+
 ## 사용자 조사
 
 - [x] 현재 일정/TODO 사용 방식을 정리한다.
@@ -78,15 +86,22 @@
   - 공개 범위 필수.
   - 마감일 optional.
   - 공동 작업자/확인자/요청자 optional.
+  - 성공 응답에는 human-friendly id, task summary, 다음 행동 안내를 포함한다.
+  - 실패 응답에는 validation failure text를 포함하고 저장소 write를 하지 않는다.
 
 - [ ] `/todo list` command contract를 갱신한다.
   - 오늘/미완료/본인 담당 우선 정렬.
   - 상태, 담당자, 공개 범위, 지연 여부 filter.
+  - active TODO 우선, 본인 담당 우선, `due_at` 오름차순, null due_at last,
+    생성 시간 오름차순 규칙을 명시한다.
   - 긴 목록 pagination 또는 요약 + 상세 조회.
+  - 결과가 없을 때는 오류가 아닌 empty-list 성공 응답을 반환한다.
 
 - [ ] `/todo status` command contract를 갱신한다.
   - `wait`, `progress`, `done`, `dismiss`.
+  - `/todo add`가 반환한 `#1` 같은 human-friendly id를 입력으로 사용한다.
   - 완료 시 결과 메모/link/file 확장 가능.
+  - `done` 전환 시 `completed_at`을 설정한다.
 
 - [ ] `/todo delay` command contract를 추가한다.
   - `내일`, `3일 뒤`, `직접 지정 날짜`.
