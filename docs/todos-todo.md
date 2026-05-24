@@ -78,15 +78,21 @@
   - 공개 범위 필수.
   - 마감일 optional.
   - 공동 작업자/확인자/요청자 optional.
+  - 생성 응답에는 human-friendly id, task summary, validation failure text,
+    empty-list 이후 다음 행동 안내를 포함한다.
 
 - [ ] `/todo list` command contract를 갱신한다.
   - 오늘/미완료/본인 담당 우선 정렬.
   - 상태, 담당자, 공개 범위, 지연 여부 filter.
+  - `due_at` 오름차순, null due date last, 생성 시간 오름차순 규칙을 명시한다.
   - 긴 목록 pagination 또는 요약 + 상세 조회.
+  - 결과가 없을 때는 오류가 아닌 empty-list 성공 응답을 반환한다.
 
 - [ ] `/todo status` command contract를 갱신한다.
   - `wait`, `progress`, `done`, `dismiss`.
+  - `/todo add`가 반환한 `#1` 같은 human-friendly id를 입력으로 사용한다.
   - 완료 시 결과 메모/link/file 확장 가능.
+  - `done` 전환 시 `completed_at`을 설정한다.
 
 - [ ] `/todo delay` command contract를 추가한다.
   - `내일`, `3일 뒤`, `직접 지정 날짜`.
