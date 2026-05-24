@@ -247,19 +247,29 @@ reporting surface for bot workflows.
 Goal: let users capture and manage lightweight tasks from Discord, with a clear
 path to storage and reporting.
 
+Contract source: `docs/prd-todo.md`의 `Todo Domain PRD` section defines the
+MVP user flows, command candidates, validation rules, record shape, acceptance
+criteria, non-goals, and open questions. Implementation work should treat that
+section as the first Todo command contract.
+
 ### Executable Tasks
 
 - [ ] Define the first todo command contract.
-  - Candidate: `/todo-add title:<text> due:<date?> assignee:<user?>`.
-  - Output should include created task summary and next action.
+  - Use the PRD candidates: `/todo-add`, `/todo-list`, and `/todo-done`.
+  - Output should include task summary, validation failure text, empty-list
+    text, and next action for each command.
+  - Use stable, human-friendly task IDs, such as `#1`, for `/todo-done`
+    instead of UUIDs or Discord Snowflakes as primary user input.
+  - Define `/todo-list` default ordering as due date ascending, null due dates
+    last, then creation time ascending.
 
 - [ ] Validate todo command input.
   - Cover required title, maximum title length, optional due date parsing, and
-    optional assignee parsing.
+    optional Discord user mention parsing as specified in the PRD.
 
 - [ ] Define todo record shape.
-  - Include id, title, description, status, requester, assignee, source Discord
-    message ID, due date, created time, and updated time.
+  - Include id, title, status, requester, assignee, source Discord message ID,
+    due date, created time, updated time, and completed time.
 
 - [ ] Implement local todo handler with fake storage.
   - Support add and list behavior in memory for tests before choosing permanent
