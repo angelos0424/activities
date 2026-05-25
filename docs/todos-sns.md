@@ -63,6 +63,13 @@
 
 ## 검증
 
+- [x] Discord bot server/runtime skeleton을 구현한다.
+  - `sns` service-local Node/TypeScript runtime 추가.
+  - `/post` command 등록/sync entrypoint 추가.
+  - `DISCORD_SNS_CHANNEL_IDS` 기반 `#sns` channel allowlist guard 추가.
+  - secret 없이 실행 가능한 config/test path 추가.
+  - 출처: GitHub issue #130.
+
 - [ ] Test Discord server의 `#sns`에서 `/post`를 실행한다.
 - [ ] title/content/channel selection을 제출한다.
 - [ ] 여러 JPEG/PNG/MP4 attachment를 업로드한다.
