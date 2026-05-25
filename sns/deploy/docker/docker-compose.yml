@@ -2,18 +2,12 @@ name: activities-discord-bot
 
 services:
   bot:
-    image: alpine:3.20
-    working_dir: /app
+    build:
+      context: ../..
+      dockerfile: Dockerfile
     env_file:
       - path: ../../.env
         required: false
     volumes:
-      - ../..:/app:ro
-    command:
-      - sh
-      - -c
-      - |
-        echo "Activities Discord bot Compose skeleton is ready."
-        echo "Replace this placeholder with the bot runtime command when implementation lands."
-        sleep infinity
+      - ../../data:/app/data
     restart: unless-stopped

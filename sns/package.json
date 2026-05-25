@@ -9,6 +9,9 @@
     "config:check": "npm run build && node dist/src/validate-config.js",
     "register-commands": "npm run build && node dist/src/register-commands.js",
     "start": "npm run build && node dist/src/index.js",
+    "config:check:prod": "node dist/src/validate-config.js",
+    "register-commands:prod": "node dist/src/register-commands.js",
+    "start:prod": "node dist/src/index.js",
     "test": "npm run build && node --test dist/tests/*.test.js"
   },
   "dependencies": {

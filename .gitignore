@@ -3,6 +3,8 @@ dist/
 target/
 *.tsbuildinfo
 .DS_Store
+data/
+sns/data/
 .env
 .env.*
 !.env.example

@@ -1,4 +1,15 @@
 services:
+  bot:
+    build:
+      context: ./sns
+      dockerfile: Dockerfile
+    env_file:
+      - path: ./sns/.env
+        required: false
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
   db:
     image: pgvector/pgvector:pg16
     environment:

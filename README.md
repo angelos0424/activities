@@ -30,7 +30,7 @@ This repository is scaffolded for the stack reviewed from GitHub issue #4:
 - Mobile packaging path: Capacitor config, deferred for the current MVP.
 - Backend: Java Spring Boot REST API scaffold, retained for automation/API support.
 - Data: PostgreSQL with pgvector, retained for workflows that need persistence/search.
-- Local infra: Docker Compose for the database.
+- Local infra: Docker Compose for the Discord bot and database.
 - Discord bot skeleton: `sns/`.
 
 ## Product Documents
@@ -52,7 +52,22 @@ This repository is scaffolded for the stack reviewed from GitHub issue #4:
 ├── docs/                    # PRDs, requirements, review notes, and architecture decisions
 ├── sns/                     # Discord bot skeleton workspace
 ├── TODOS.md                 # Cross-service implementation roadmap and TODO index
-└── docker-compose.yml       # Local PostgreSQL + pgvector
+└── docker-compose.yml       # Local Discord bot + PostgreSQL/pgvector
+```
+
+## Local Development
+
+Run the Discord bot in Docker:
+
+```bash
+cp sns/.env.example sns/.env
+docker compose up --build bot
+```
+
+Register Discord slash commands from the bot image:
+
+```bash
+docker compose run --rm bot npm run register-commands:prod
 ```
 
 ## Existing Scaffold Local Development
