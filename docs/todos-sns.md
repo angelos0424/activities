@@ -15,9 +15,12 @@
   - Facebook이 Page인가?
   - 이 팀에게 app review와 publishing permission이 현실적인가?
 
-- [ ] Discord file input pattern을 결정한다.
-  - 선호: 선택한 SDK가 지원하면 Discord modal file upload.
-  - 대체: `/post`가 flow를 열고 사용자가 attachment로 reply.
+- [x] Discord file input pattern을 결정한다.
+  - 결정: `discord.js >= 14.24.0` 기준 Discord modal file upload를 `/post`의 1차 파일 입력 방식으로 사용한다.
+  - Flow: `/post`가 target/homepage_type을 먼저 받은 뒤, 선택 결과에 따라 file upload modal의 `min_values`/`max_values`를 설정한다.
+  - 대체: SDK/runtime 또는 Discord client 호환성 문제가 있으면 `/post`가 flow를 열고 사용자가 안내 메시지에 attachment로 reply하거나 thread에 업로드한다.
+  - 검증: image/* 또는 video/mp4만 허용, 최대 10개, 제출 후 CDN download 단계에서 content type/size를 검증한다.
+  - 출처: `docs/discord-command-spec.md`
 
 ## 제품 설계
 
