@@ -1,6 +1,6 @@
 # Activities Docker Compose
 
-Docker Compose skeleton for the local Activities Discord bot service.
+Docker Compose setup for the local Activities Discord bot service.
 
 This MVP setup intentionally defines only the `bot` service. A database container is
 not included because the first storage target is Google Sheets.
@@ -15,6 +15,15 @@ cp sns/.env.example sns/.env
 
 Fill in the Discord and Google Sheets values in `sns/.env`. Keep real secrets and
 Google service account JSON files out of git.
+
+For local file-backed credentials and bot data, place files under `sns/data`.
+For example:
+
+```text
+GOOGLE_APPLICATION_CREDENTIALS=/app/data/google-service-account.json
+SQLITE_PATH=/app/data/activities.sqlite
+RECEIPT_STORAGE_DIR=/app/data/receipts
+```
 
 ## Validate
 
@@ -32,6 +41,8 @@ the `bot` service reads it.
 docker compose -f sns/deploy/docker/docker-compose.yml up bot
 ```
 
-The current command is a placeholder that keeps the container alive. Actual Discord
-bot behavior and the final runtime command are intentionally out of scope for this
-skeleton.
+Register slash commands from the same image:
+
+```bash
+docker compose -f sns/deploy/docker/docker-compose.yml run --rm bot npm run register-commands:prod
+```

@@ -43,6 +43,25 @@ cd sns
 npm run start
 ```
 
+## Docker
+
+Build and run the bot from the repository root:
+
+```bash
+cp sns/.env.example sns/.env
+docker compose up --build bot
+```
+
+The container reads `sns/.env` and mounts `./data` to `/app/data`. If you keep
+Google credentials or local bot state on disk, point the corresponding env values
+at `/app/data/...`.
+
+Register slash commands from the built image:
+
+```bash
+docker compose run --rm bot npm run register-commands:prod
+```
+
 The current `/post` implementation verifies the `#sns` channel allowlist and routes
 to the `sns-manager` domain boundary. Target select, modal submission, and file
 attachment collection are intentionally split behind interfaces for follow-up work.
