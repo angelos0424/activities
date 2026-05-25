@@ -19,8 +19,11 @@ export interface ConfigLoadOptions {
 }
 
 export class ConfigError extends Error {
-  constructor(public readonly missing: string[]) {
+  public readonly missing: string[];
+
+  constructor(missing: string[]) {
     super(`Missing required Discord bot config: ${missing.join(", ")}`);
+    this.missing = missing;
     this.name = "ConfigError";
   }
 }
@@ -35,7 +38,7 @@ export function loadBotConfig(
   const requireAllowlist = options.requireAllowlist ?? true;
   const commandScope = parseCommandScope(env.DISCORD_COMMAND_SCOPE);
   const snsChannelIds = parseCsvIds(
-    env.DISCORD_SNS_CHANNEL_IDS ?? env.DISCORD_ALLOWED_CHANNEL_IDS,
+    emptyToUndefined(env.DISCORD_SNS_CHANNEL_IDS) ?? env.DISCORD_ALLOWED_CHANNEL_IDS,
   );
   const missing: string[] = [];
 
@@ -89,7 +92,7 @@ export function listMissingRuntimeConfig(env: Env = process.env): string[] {
 function parseCommandScope(value: string | undefined): CommandScope {
   if (value === undefined || value.trim() === "") return "guild";
   if (value === "guild" || value === "global") return value;
-  throw new ConfigError(["DISCORD_COMMAND_SCOPE must be guild or global"]);
+  throw new Error("DISCORD_COMMAND_SCOPE must be guild or global");
 }
 
 function parseLogLevel(value: string | undefined): BotConfig["logLevel"] {

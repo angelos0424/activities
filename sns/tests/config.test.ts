@@ -38,4 +38,35 @@ describe("loadBotConfig", () => {
       (error) => error instanceof ConfigError && error.missing.includes("DISCORD_SNS_CHANNEL_IDS"),
     );
   });
+
+  it("falls back to legacy channel allowlist when sns allowlist is empty", () => {
+    const config = loadBotConfig(
+      {
+        DISCORD_COMMAND_SCOPE: "guild",
+        DISCORD_SNS_CHANNEL_IDS: "",
+        DISCORD_ALLOWED_CHANNEL_IDS: "legacy-channel",
+      },
+      {
+        requireSecrets: false,
+      },
+    );
+
+    assert.deepEqual(config.discord.snsChannelIds, ["legacy-channel"]);
+  });
+
+  it("uses a direct validation error for invalid command scope", () => {
+    assert.throws(
+      () =>
+        loadBotConfig(
+          {
+            DISCORD_COMMAND_SCOPE: "workspace",
+          },
+          {
+            requireSecrets: false,
+            requireAllowlist: false,
+          },
+        ),
+      /^Error: DISCORD_COMMAND_SCOPE must be guild or global$/,
+    );
+  });
 });
