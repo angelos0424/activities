@@ -194,7 +194,7 @@ target pending/processing 존재 -> sns_posts.status = processing
 모든 선택 target success       -> sns_posts.status = success
 하나 이상 success, 나머지 failed/skipped
                             -> sns_posts.status = partial_success
-모든 선택 target failed       -> sns_posts.status = failed
+모든 active target failed     -> sns_posts.status = failed
 모든 선택 target skipped      -> sns_posts.status = draft
 ```
 
