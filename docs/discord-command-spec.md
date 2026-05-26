@@ -101,7 +101,7 @@ post 작성 modal
 modal submit
   |
   v
-CDN download -> validation -> local file metadata 저장 -> target별 upload/manual packet
+CDN download -> validation -> durable storage/local file 저장 -> target별 upload/manual packet
 ```
 
 Flow:
@@ -112,7 +112,7 @@ Flow:
 4. Bot이 target 선택 interaction에 대한 첫 응답으로 post 작성 modal을 연다. Modal을 열기 전에는 해당 interaction을 defer하지 않는다.
 5. Modal은 `title`, `content`, `assets` file upload를 받는다.
 6. Bot은 modal submit 후 interaction을 defer하고 Discord CDN에서 attachment를 내려받는다.
-7. Bot이 모든 asset을 검증한 뒤 target별 진행 상태 메시지를 표시한다.
+7. Bot이 모든 asset을 검증하고 local storage 또는 storage provider에 저장한 뒤 target별 진행 상태 메시지를 표시한다.
 8. Bot이 결과 URL 또는 최종 실패 메시지를 반환한다.
 
 File upload 설정:
@@ -184,6 +184,20 @@ Bot은 target별 결과 block을 반환한다.
 Homepage는 Creatorlink admin browser automation으로 notice/gallery 포스팅을 완료하고, 게시 후 생성된 public URL을 결과로 반환한다. 자동화 실패 시 homepage target만 실패 처리하고 안전한 실패 메시지와 재시도 action을 반환한다.
 
 Instagram/Facebook은 Meta App Review/Advanced Access와 publishing permission이 준비되기 전까지 `manual_required` 상태를 반환한다. 권한이 준비된 target은 자동 업로드 후 결과 URL을 반환하고, 권한이 없는 target은 title/content/assets 기반 manual upload packet을 함께 제공한다.
+
+Manual upload packet의 asset 링크는 Discord 원본 CDN URL을 그대로 쓰지 않는다. Discord attachment CDN URL은 시간이 지나면 접근이 막힐 수 있으므로, packet은 local storage/storage provider에 저장된 URL 또는 path를 사용한다. 아직 영구 storage provider가 없으면 bot이 manual packet 응답 또는 public thread에 파일을 다시 첨부해 사용자가 즉시 받을 수 있게 한다. 저장된 asset 또는 재첨부 파일을 제공할 수 없으면 해당 target은 `manual_required`가 아니라 `failed`로 기록하고 재시도 안내를 반환한다.
+
+Parent post status rollup:
+
+```text
+target pending/processing 존재 -> sns_posts.status = processing
+모든 선택 target success       -> sns_posts.status = success
+하나 이상 success/manual_required, 모두 terminal
+                            -> sns_posts.status = partial_success
+모든 선택 target failed       -> sns_posts.status = failed
+```
+
+`manual_required`는 target별 fallback 상태다. Parent `sns_posts.status` enum에는 추가하지 않고, 모든 Instagram/Facebook target이 `manual_required`인 경우도 "수동 업로드 패킷 생성까지 완료된 요청"으로 보고 `partial_success`로 집계한다.
 
 ### 실패 응답
 

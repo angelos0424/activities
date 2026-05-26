@@ -51,7 +51,8 @@
   - 결과 URL
   - 실패 사유
   - 재시도 action
-  - 출처: `docs/data-schema.md`
+  - Target `manual_required`는 parent `sns_posts.status`에 새 enum을 추가하지 않고 terminal fallback으로 집계한다. 모든 target이 자동 게시 `success`이면 parent `success`, 하나 이상 `success` 또는 `manual_required`이고 모두 terminal이면 parent `partial_success`, 모든 선택 target이 `failed`이면 parent `failed`다.
+  - 출처: `docs/data-schema.md`, `docs/prd-sns.md`, `docs/discord-command-spec.md`
 
 ## 엔지니어링 계획
 
@@ -67,6 +68,7 @@
   - Creatorlink 자동화가 실패하면 해당 homepage target만 실패 처리하고 안전한 실패 메시지와 재시도 action을 반환한다.
   - Instagram/Facebook 자동 업로드는 Meta account 연결, access token, App Review/Advanced Access, publishing permission이 준비된 경우에만 켠다.
   - Meta API access가 없는 channel은 `sns_posts`와 `sns_post_assets` 데이터를 조합해 title/content/assets 기반 manual upload packet fallback을 런타임에 만든다.
+  - Manual upload packet은 만료될 수 있는 Discord `source_attachment_url`을 다운로드 링크로 쓰지 않고, `storage_url`/local storage path 또는 bot이 응답 시점에 다시 첨부한 파일을 제공한다.
   - 출처: GitHub issue #120, GitHub issue #121.
 
 - [x] 실패 동작을 정의한다.
