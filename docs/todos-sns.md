@@ -15,10 +15,17 @@
   - 다음 확인 필요: Creatorlink 로그인/세션 보관 방식, notice/gallery admin route, publish 버튼/상태 selector, 파일 업로드 selector, 게시 후 public URL 추출 방식.
   - 출처: GitHub issue #120 사용자 확인, `docs/prd-sns.md`
 
-- [ ] Meta account 가능성을 확인한다.
-  - Instagram이 professional/business account인가?
-  - Facebook이 Page인가?
-  - 이 팀에게 app review와 publishing permission이 현실적인가?
+- [x] Meta account 가능성을 확인한다.
+  - 확인일: 2026-05-26
+  - Instagram 계정: `https://www.instagram.com/prokyouth`, Business account로 사용자 확인됨.
+  - Facebook Page: `https://www.facebook.com/prokyouth/`, Page로 사용자 확인됨.
+  - Instagram과 Facebook Page는 연결되어 있는 것으로 사용자 확인됨. 구현 전 Graph API로 Page의 linked Instagram professional account id를 조회해 재확인한다.
+  - Meta Developer App/App Review 진행 가능: Page/Instagram 관리 권한이 있는 Facebook 계정으로 app 생성과 테스트가 가능하고, App Review까지 진행할 의사가 있는 것으로 사용자 확인됨.
+  - 비용 판단: 검토한 Meta publishing 문서는 per-call API 이용료보다 access token, 권한, app review, rate limit을 핵심 제약으로 둔다. 별도 유료 API 전제가 없어 비용 때문에 MVP에서 제외하지 않는다.
+  - 필요한 Instagram 권한: Facebook Login path 기준 `instagram_basic`, `instagram_content_publish`, `pages_read_engagement`; Instagram Login path 기준 `instagram_business_basic`, `instagram_business_content_publish`.
+  - 필요한 Facebook Page 권한: `pages_manage_posts`, `pages_read_engagement`; 사진/동영상 publish에는 media endpoint와 추가 권한/제약을 구현 시 확인한다.
+  - 판정: Instagram/Facebook 자동 업로드는 MVP 후보에 포함한다. 단, App Review/Advanced Access 승인 전에는 production 자동 게시를 켜지 않고 manual upload packet fallback을 유지한다.
+  - 출처: GitHub issue #121 사용자 확인, Meta Instagram Content Publishing docs, Meta Pages API Posts docs.
 
 - [x] Discord file input pattern을 결정한다.
   - 결정: `discord.js >= 14.24.0` 기준 Discord modal file upload를 `/post`의 1차 파일 입력 방식으로 사용한다.
@@ -58,9 +65,9 @@
   - Homepage adapter는 Creatorlink admin browser automation으로 notice/gallery를 자동 포스팅한다.
   - 성공 시 생성된 포스팅 URL을 target result URL로 반환한다.
   - Creatorlink 자동화가 실패하면 해당 homepage target만 실패 처리하고 안전한 실패 메시지와 재시도 action을 반환한다.
-  - Instagram/Facebook 자동 업로드는 account/API permission이 준비된 경우에만.
-  - API access가 없는 channel은 `sns_posts`와 `sns_post_assets` 데이터를 조합해 title/content/assets 기반 manual upload packet fallback을 런타임에 만든다.
-  - 출처: GitHub issue #120.
+  - Instagram/Facebook 자동 업로드는 Meta account 연결, access token, App Review/Advanced Access, publishing permission이 준비된 경우에만 켠다.
+  - Meta API access가 없는 channel은 `sns_posts`와 `sns_post_assets` 데이터를 조합해 title/content/assets 기반 manual upload packet fallback을 런타임에 만든다.
+  - 출처: GitHub issue #120, GitHub issue #121.
 
 - [x] 실패 동작을 정의한다.
   - 제출 전 validation failure는 전체 요청을 중단하고 수정 안내를 반환한다.

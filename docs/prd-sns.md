@@ -94,6 +94,28 @@ MVP 대체 flow:
 4. 자동화 실패는 homepage target 실패로 기록하고, 이미 성공한 다른 target은 되돌리지 않는다.
 5. 구현 전 확인할 세부 항목은 Creatorlink 로그인/세션 보관 방식, notice/gallery admin route, publish 버튼/상태 selector, 파일 업로드 selector, 게시 후 public URL 추출 방식이다.
 
+### 7.2 Meta account/API 조사 결과
+
+확인일: 2026-05-26
+
+사용자 확인 결과 Instagram 계정은 `https://www.instagram.com/prokyouth`이고 Business account다. Facebook target은 개인 profile이 아니라 `https://www.facebook.com/prokyouth/` Page다. Instagram 계정은 해당 Facebook Page에 연결되어 있는 것으로 확인됐으며, 구현 전 Graph API로 Page의 linked Instagram professional account id를 조회해 재확인한다.
+
+Meta Developer App과 App Review도 진행 범위에 포함한다. Page/Instagram 관리 권한이 있는 Facebook 계정으로 app 생성과 테스트가 가능하고, App Review까지 진행할 의사가 있는 것으로 확인됐다. 검토한 Meta publishing 문서는 per-call API 이용료보다 access token, 권한, app review, rate limit을 핵심 제약으로 둔다. 별도 유료 API 전제가 없어 비용 때문에 MVP에서 제외하지 않는다.
+
+필요 조건:
+
+1. Instagram publishing은 Professional account가 필요하다. Facebook Login path를 쓰면 linked Page의 Page access token과 `instagram_basic`, `instagram_content_publish`, `pages_read_engagement`가 필요하다.
+2. Instagram Login path를 쓰면 `instagram_business_basic`, `instagram_business_content_publish`가 필요하다.
+3. Facebook Page publishing은 Page access token과 `pages_manage_posts`, `pages_read_engagement`가 필요하다. Page user는 해당 Page에서 content creation 관련 task를 수행할 수 있어야 한다.
+4. 사진/동영상 publish는 각 platform의 media endpoint, public media URL 또는 upload flow, media type 제한을 adapter 구현 시 검증한다.
+
+판정:
+
+1. Instagram/Facebook 자동 업로드는 MVP 후보에 포함한다.
+2. Production 자동 게시 enable 조건은 Meta Developer App, access token 저장/갱신 정책, App Review/Advanced Access, publishing permission 승인이다.
+3. 승인 전에는 Instagram/Facebook target을 `manual_required`로 기록하고, title/content/assets 기반 manual upload packet fallback을 반환한다.
+4. App Review 제출에는 실제 `/post` flow에서 Meta Login, Page/Instagram 선택 또는 확인, 게시 실행, 결과 URL 반환까지 보여주는 테스트 path와 screencast가 필요하다.
+
 ## 8. Source 요구사항 메모
 
 이 PRD는 PR #109 이전 작업 tree에 있던 local source note `SNS_POST_REQUIREMENTS.md`의 내용을 반영한다. 해당 note와 PR #109 문서 set이 충돌할 때는 PR #109를 organizing source of truth로 유지하고, note 내용은 implementation detail로 접어 넣는다.
@@ -121,8 +143,8 @@ MVP 대체 flow:
 | SNS-FE-002 | Discord modal/form 입력을 처리한다. | P0 |
 | SNS-FE-003 | 파일 첨부 수집 및 검증을 처리한다. | P0 |
 | SNS-FE-004 | Homepage 업로드 adapter를 제공한다. Creatorlink admin browser automation으로 notice/gallery를 자동 포스팅하고 결과 URL을 반환한다. | P0 |
-| SNS-FE-005 | Instagram upload adapter를 제공한다. | P1 |
-| SNS-FE-006 | Facebook upload adapter를 제공한다. | P1 |
+| SNS-FE-005 | Instagram upload adapter를 제공한다. App Review/Advanced Access 승인 전에는 `manual_required` fallback을 반환한다. | P1 |
+| SNS-FE-006 | Facebook upload adapter를 제공한다. App Review/Advanced Access 승인 전에는 `manual_required` fallback을 반환한다. | P1 |
 | SNS-FE-007 | 채널별 업로드 결과를 저장한다. | P0 |
 | SNS-FE-008 | 실패한 채널만 재시도할 수 있다. | P1 |
 | SNS-FE-009 | 제출 전 검증 실패는 전체 요청을 중단하고 수정 안내를 반환한다. | P0 |
@@ -158,6 +180,14 @@ MVP 대체 flow:
 | error_message | text | 사용자에게 보여줄 수 있는 오류 |
 | retry_count | integer | 재시도 횟수 |
 
+상위 `sns_posts.status` 집계 규칙:
+
+1. 하나 이상의 target이 `processing`이면 parent는 `processing`이다.
+2. 모든 target이 `success` 또는 `skipped`이면 parent는 `success`다.
+3. 하나 이상의 target이 `success`이고 나머지 target이 `failed` 또는 `manual_required`이면 parent는 `partial_success`다.
+4. 자동 업로드 성공 없이 모든 active target이 `manual_required`이면 parent는 `draft`로 유지한다. 이 상태는 사용자가 수동 업로드 패킷으로 게시를 완료해야 하는 pending 운영 상태다.
+5. 자동 업로드 성공 없이 하나 이상의 target이 `failed`이고 `manual_required`만 함께 남아 있으면 parent는 `failed`다.
+
 ### `sns_post_assets`
 
 | 필드 | 타입 | 메모 |
@@ -167,7 +197,9 @@ MVP 대체 flow:
 | source_attachment_url | text | source URL |
 | mime_type | text | 이미지 또는 영상 |
 | size_bytes | bigint | 파일 크기 |
-| storage_url | text | 필요 시 저장된 copy |
+| storage_url | text | 수동 업로드 패킷과 provider upload에 사용할 durable copy |
+
+Discord attachment CDN URL은 일정 시간 뒤 접근이 만료될 수 있으므로 manual upload packet은 `source_attachment_url`을 장기 다운로드 링크로 사용하지 않는다. Bot은 modal submit 또는 attachment 수집 직후 파일을 local storage 또는 향후 durable storage adapter에 복사하고, 수동 업로드 패킷에는 `storage_url`을 쓰거나 Discord 응답에 파일을 다시 첨부한다. `storage_url`이 없고 source URL도 만료된 경우 해당 target은 재업로드가 필요한 실패로 표시한다.
 
 ## 11. 검증 규칙
 
@@ -197,8 +229,8 @@ MVP 대체 flow:
 ## 13. 미결정 사항
 
 1. Creatorlink admin browser automation의 안정적인 selector와 게시 후 URL 추출 방식은 무엇인가?
-2. Instagram/Facebook은 단체 계정이 Business/Page 권한을 갖고 있는가?
-3. Meta app review를 통과할 계획인가, 아니면 MVP는 홈페이지 자동 업로드 + SNS 수동 보조로 갈 것인가?
+2. Meta App Review/Advanced Access 제출에 필요한 테스트 app, privacy policy, screencast, reviewer credentials를 어떻게 준비할 것인가?
+3. Meta access token 저장, 갱신, 폐기 정책은 어떻게 둘 것인가?
 4. 파일 최대 개수와 최대 용량은 어떻게 제한할 것인가?
 5. 업로드 전 승인자가 필요한가?
 6. Meta API로 Instagram/Facebook 공식 음악 library 선택 또는 삽입을 지원할 수 있는가?
@@ -208,4 +240,7 @@ MVP 대체 flow:
 - Discord application command option은 attachment input을 지원한다: https://docs.discord.com/developers/interactions/application-commands
 - Discord modal component는 form 형태 입력 수집에 적합하다: https://docs.discord.com/developers/components/using-modal-components
 - Discord는 2025년에 modal file upload component를 추가했다: https://docs.discord.com/developers/change-log#introducing-the-file-upload-component-in-modals
+- Instagram Content Publishing: https://developers.facebook.com/docs/instagram-platform/content-publishing/
+- Facebook Pages API Posts: https://developers.facebook.com/docs/pages-api/posts/
+- Meta App Review: https://developers.facebook.com/docs/resp-plat-initiatives/individual-processes/app-review/
 - 이 PR에 반영된 local source note: `/home/twkim/Project/activities/SNS_POST_REQUIREMENTS.md`

@@ -183,6 +183,8 @@ Bot은 target별 결과 block을 반환한다.
 
 Homepage는 Creatorlink admin browser automation으로 notice/gallery 포스팅을 완료하고, 게시 후 생성된 public URL을 결과로 반환한다. 자동화 실패 시 homepage target만 실패 처리하고 안전한 실패 메시지와 재시도 action을 반환한다.
 
+Instagram/Facebook은 Meta App Review/Advanced Access와 publishing permission이 준비되기 전까지 `manual_required` 상태를 반환한다. 권한이 준비된 target은 자동 업로드 후 결과 URL을 반환하고, 권한이 없는 target은 title/content/assets 기반 manual upload packet을 함께 제공한다.
+
 ### 실패 응답
 
 2~3번 재시도 후:
