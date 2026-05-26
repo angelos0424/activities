@@ -24,7 +24,7 @@
   - 비용 판단: 검토한 Meta publishing 문서는 per-call API 이용료보다 access token, 권한, app review, rate limit을 핵심 제약으로 둔다. 별도 유료 API 전제가 없어 비용 때문에 MVP에서 제외하지 않는다.
   - 필요한 Instagram 권한: Facebook Login path 기준 `instagram_basic`, `instagram_content_publish`, `pages_read_engagement`; Instagram Login path 기준 `instagram_business_basic`, `instagram_business_content_publish`.
   - 필요한 Facebook Page 권한: `pages_manage_posts`, `pages_read_engagement`; 사진/동영상 publish에는 media endpoint와 추가 권한/제약을 구현 시 확인한다.
-  - 판정: Instagram/Facebook 자동 업로드는 MVP 후보에 포함한다. 단, App Review/Advanced Access 승인 전에는 production 자동 게시를 켜지 않고 manual upload packet fallback을 유지한다.
+  - 판정: Instagram/Facebook 자동 업로드는 MVP 후보에 포함한다. 단, App Review/Advanced Access 승인 전에는 production 자동 게시를 켜지 않고 해당 target을 `skipped` 처리한다.
   - 출처: GitHub issue #121 사용자 확인, Meta Instagram Content Publishing docs, Meta Pages API Posts docs.
 
 - [x] Discord file input pattern을 결정한다.
@@ -51,7 +51,8 @@
   - 결과 URL
   - 실패 사유
   - 재시도 action
-  - Target `manual_required`는 parent `sns_posts.status`에 새 enum을 추가하지 않고 terminal fallback으로 집계한다. 모든 target이 자동 게시 `success`이면 parent `success`, 하나 이상 `success` 또는 `manual_required`이고 모두 terminal이면 parent `partial_success`, 모든 선택 target이 `failed`이면 parent `failed`다.
+  - API access가 없는 Instagram/Facebook target은 업로드하지 않고 `skipped`로 기록한다.
+  - 모든 선택 target이 자동 게시 `success`이면 parent `success`, 하나 이상 target이 `success`이고 나머지가 `failed` 또는 `skipped`이면 parent `partial_success`, 모든 active target이 `failed`이면 parent `failed`, 모든 선택 target이 `skipped`이면 parent `draft`다.
   - 출처: `docs/data-schema.md`, `docs/prd-sns.md`, `docs/discord-command-spec.md`
 
 ## 엔지니어링 계획
@@ -67,9 +68,8 @@
   - 성공 시 생성된 포스팅 URL을 target result URL로 반환한다.
   - Creatorlink 자동화가 실패하면 해당 homepage target만 실패 처리하고 안전한 실패 메시지와 재시도 action을 반환한다.
   - Instagram/Facebook 자동 업로드는 Meta account 연결, access token, App Review/Advanced Access, publishing permission이 준비된 경우에만 켠다.
-  - Meta API access가 없는 channel은 `sns_posts`와 `sns_post_assets` 데이터를 조합해 title/content/assets 기반 manual upload packet fallback을 런타임에 만든다.
-  - Manual upload packet은 만료될 수 있는 Discord `source_attachment_url`을 다운로드 링크로 쓰지 않고, `storage_url`/local storage path 또는 bot이 응답 시점에 다시 첨부한 파일을 제공한다.
-  - 출처: GitHub issue #120, GitHub issue #121.
+  - Meta API access가 없는 Instagram/Facebook channel은 업로드하지 않고 `skipped`로 기록한다. 수동 업로드 패킷도 생성하지 않는다.
+  - 출처: GitHub issue #120, GitHub issue #121, GitHub issue #123.
 
 - [x] 실패 동작을 정의한다.
   - 제출 전 validation failure는 전체 요청을 중단하고 수정 안내를 반환한다.
