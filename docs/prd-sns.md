@@ -153,7 +153,7 @@ MVP 대체 flow:
 | post_id | uuid | parent post |
 | target | enum | instagram, facebook, homepage |
 | status | enum | pending, processing, success, failed, manual_required, skipped |
-| result_url | text | 결과 URL. `manual_required`이면 비워둘 수 있음 |
+| result_url | text | 결과 URL. `manual_required`이면 비워둘 수 있으며, 수동 업로드 패킷은 `sns_posts`와 `sns_post_assets` 데이터를 조합해 런타임에 생성함 |
 | error_message | text | 사용자에게 보여줄 수 있는 오류 |
 | retry_count | integer | 재시도 횟수 |
 

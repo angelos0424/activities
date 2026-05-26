@@ -55,7 +55,7 @@
   - 초기 MVP 결정: bot state와 SNS request tracking은 SQLite.
 
 - [x] Upload adapter 범위를 결정한다.
-  - Homepage adapter는 자동 업로드 가능 여부가 확인될 때까지 `manual_required`를 반환하고, title/content/assets/homepage_type을 수동 업로드 패킷으로 만든다.
+  - Homepage adapter는 자동 업로드 가능 여부가 확인될 때까지 `manual_required`를 반환하고, `sns_posts`와 `sns_post_assets` 데이터를 조합해 title/content/assets/homepage_type 기반 수동 업로드 패킷을 런타임에 만든다.
   - Homepage 자동 업로드는 target config와 API/admin flow가 확인된 뒤 별도 adapter로 연결한다.
   - Instagram/Facebook 자동 업로드는 account/API permission이 준비된 경우에만.
   - API access가 없는 channel은 manual upload packet fallback.
