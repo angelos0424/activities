@@ -180,9 +180,9 @@ MVP upload/fallback 정책:
 
 1. `sns_posts.status`는 전체 요청 처리 상태이고, `skipped`는 parent status가 아니라 target status다.
 2. Target 중 하나라도 `pending` 또는 `processing`이면 parent는 `processing`이다.
-3. 선택된 모든 non-skipped target이 `success`이면 parent는 `success`다. 모든 선택 target이 `skipped`인 경우도 요청이 명세대로 처리된 것이므로 parent는 `success`다.
+3. 하나 이상의 non-skipped target이 있고 선택된 모든 non-skipped target이 `success`이면 parent는 `success`다. 모든 선택 target이 `skipped`인 경우도 요청이 명세대로 처리된 것이므로 parent는 `success`다.
 4. 모든 target 처리가 끝났고 하나 이상이 `success`이고 하나 이상이 `failed`이면 parent는 `partial_success`다. `skipped`는 성공/실패 집계에서 제외한다.
-5. 모든 선택 non-skipped target이 `failed`이거나 제출 전 validation failure로 target work가 시작되지 못하면 parent는 `failed`다.
+5. 하나 이상의 non-skipped target이 있고 모든 선택 non-skipped target이 `failed`이거나 제출 전 validation failure로 target work가 시작되지 못하면 parent는 `failed`다.
 
 ### `sns_post_targets`
 

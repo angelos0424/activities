@@ -189,12 +189,12 @@ Parent post status rollup:
 
 ```text
 target pending/processing 존재 -> sns_posts.status = processing
-모든 선택 non-skipped target success
+하나 이상 non-skipped target 존재, 모두 success
                             -> sns_posts.status = success
 모든 선택 target skipped    -> sns_posts.status = success
 하나 이상 success, 하나 이상 failed, 모두 terminal
                             -> sns_posts.status = partial_success
-모든 선택 non-skipped target failed
+하나 이상 non-skipped target 존재, 모두 failed
                             -> sns_posts.status = failed
 ```
 

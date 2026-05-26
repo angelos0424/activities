@@ -51,7 +51,7 @@
   - 결과 URL
   - 실패 사유
   - 재시도 action
-  - Target `skipped`는 parent `sns_posts.status`에 새 enum을 추가하지 않는 terminal no-upload 상태다. `skipped`는 성공/실패 집계에서 제외하고, 모든 선택 non-skipped target이 `success`이면 parent `success`, 하나 이상 `success`이고 하나 이상 `failed`이면 parent `partial_success`, 모든 선택 non-skipped target이 `failed`이면 parent `failed`다. 모든 선택 target이 `skipped`이면 요청이 명세대로 처리된 것이므로 parent `success`로 두고 target별 사유를 보여준다.
+  - Target `skipped`는 parent `sns_posts.status`에 새 enum을 추가하지 않는 terminal no-upload 상태다. `skipped`는 성공/실패 집계에서 제외하고, 하나 이상의 non-skipped target이 있고 모두 `success`이면 parent `success`, 하나 이상 `success`이고 하나 이상 `failed`이면 parent `partial_success`, 하나 이상의 non-skipped target이 있고 모두 `failed`이면 parent `failed`다. 모든 선택 target이 `skipped`이면 요청이 명세대로 처리된 것이므로 parent `success`로 두고 target별 사유를 보여준다.
   - 출처: `docs/data-schema.md`, `docs/prd-sns.md`, `docs/discord-command-spec.md`
 
 ## 엔지니어링 계획
