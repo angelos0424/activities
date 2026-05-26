@@ -8,12 +8,12 @@
 
 - [x] 홈페이지 업로드 target을 확인한다.
   - 확인일: 2026-05-26
-  - 확인 결과: 현재 repository 문서/코드에는 실제 홈페이지 URL, CMS 종류, admin flow, notice/gallery API endpoint, 인증 방식이 없다.
-  - `docs/data-schema.md`의 `sns-manager.homepage_target`은 placeholder이고, `sns/.env.example`에도 homepage adapter 설정값이 없다.
-  - 현재 `sns-manager` runtime은 `/post` command boundary와 domain routing만 제공하며 homepage upload adapter 구현은 없다.
-  - 판정: API로 notice/gallery를 자동 생성할 수 있는지 확인 불가. 자동 업로드는 보류하고 manual upload packet fallback이 필요하다.
-  - 다음 확인 필요: 홈페이지 URL/admin URL, CMS/vendor, 관리자 권한, API 문서 또는 webhook 지원 여부, notice/gallery content model, 파일 업로드 제한, draft/publish 권한.
-  - 출처: `docs/prd-sns.md`, `docs/data-schema.md`, `sns/.env.example`, `sns/src/domains/sns/post.ts`
+  - 사용자 확인 결과: 홈페이지 builder/CMS는 Creatorlink(`https://creatorlink.net/`)이다.
+  - 홈페이지 URL 자체는 bot flow 설계에 필요하지 않다. Bot server에 특정 호스팅/admin flow 기준 자동화 스크립트를 추가할 예정이며, 해당 flow에 맞춘 URL/path/selector 하드코딩은 허용한다.
+  - API 연동은 필수 전제가 아니다. Selenium/Playwright 같은 browser automation으로 Creatorlink admin flow를 실행해 notice/gallery 포스팅까지 완료하는 것이 목표다.
+  - 완료 후 bot은 생성된 포스팅 주소를 추출해 사용자에게 보여준다.
+  - 다음 확인 필요: Creatorlink 로그인/세션 보관 방식, notice/gallery admin route, publish 버튼/상태 selector, 파일 업로드 selector, 게시 후 public URL 추출 방식.
+  - 출처: GitHub issue #120 사용자 확인, `docs/prd-sns.md`
 
 - [ ] Meta account 가능성을 확인한다.
   - Instagram이 professional/business account인가?
@@ -55,10 +55,11 @@
   - 초기 MVP 결정: bot state와 SNS request tracking은 SQLite.
 
 - [x] Upload adapter 범위를 결정한다.
-  - Homepage adapter는 자동 업로드 가능 여부가 확인될 때까지 `manual_required`를 반환하고, `sns_posts`와 `sns_post_assets` 데이터를 조합해 title/content/assets/homepage_type 기반 수동 업로드 패킷을 런타임에 만든다.
-  - Homepage 자동 업로드는 target config와 API/admin flow가 확인된 뒤 별도 adapter로 연결한다.
+  - Homepage adapter는 Creatorlink admin browser automation으로 notice/gallery를 자동 포스팅한다.
+  - 성공 시 생성된 포스팅 URL을 target result URL로 반환한다.
+  - Creatorlink 자동화가 실패하면 해당 homepage target만 실패 처리하고 안전한 실패 메시지와 재시도 action을 반환한다.
   - Instagram/Facebook 자동 업로드는 account/API permission이 준비된 경우에만.
-  - API access가 없는 channel은 manual upload packet fallback.
+  - API access가 없는 channel은 `sns_posts`와 `sns_post_assets` 데이터를 조합해 title/content/assets 기반 manual upload packet fallback을 런타임에 만든다.
   - 출처: GitHub issue #120.
 
 - [x] 실패 동작을 정의한다.

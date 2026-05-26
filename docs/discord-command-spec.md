@@ -176,12 +176,12 @@ Bot은 target별 결과 block을 반환한다.
 
 ```text
 업로드 결과
-- Homepage: 수동 업로드 필요
+- Homepage: 완료 https://...
 - Instagram: 완료 https://...
 - Facebook: 수동 업로드 필요
 ```
 
-Homepage는 실제 홈페이지 target config, CMS/API, admin flow가 확인되기 전까지 자동 업로드 성공으로 표시하지 않는다. 이 경우 bot은 `manual_required` 상태와 title/content/assets/homepage_type 기반 수동 업로드 패킷을 반환한다.
+Homepage는 Creatorlink admin browser automation으로 notice/gallery 포스팅을 완료하고, 게시 후 생성된 public URL을 결과로 반환한다. 자동화 실패 시 homepage target만 실패 처리하고 안전한 실패 메시지와 재시도 action을 반환한다.
 
 ### 실패 응답
 
