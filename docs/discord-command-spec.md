@@ -189,14 +189,16 @@ Parent post status rollup:
 
 ```text
 target pending/processing 존재 -> sns_posts.status = processing
-모든 선택 target success       -> sns_posts.status = success
-하나 이상 success, 하나 이상 failed/skipped, 모두 terminal
+모든 선택 non-skipped target success
+                            -> sns_posts.status = success
+모든 선택 target skipped    -> sns_posts.status = success
+하나 이상 success, 하나 이상 failed, 모두 terminal
                             -> sns_posts.status = partial_success
-모든 선택 target failed/skipped
+모든 선택 non-skipped target failed
                             -> sns_posts.status = failed
 ```
 
-`skipped`는 target별 no-upload 상태다. Parent `sns_posts.status` enum에는 추가하지 않고, 선택 target이 모두 `skipped`이면 실제 업로드가 없었으므로 parent는 `failed`로 집계한다.
+`skipped`는 target별 no-upload 상태다. Parent `sns_posts.status` enum에는 추가하지 않고 성공/실패 집계에서 제외한다. 선택 target이 모두 `skipped`이면 요청은 명세대로 처리된 것이므로 parent는 `success`로 두고, target별 API access 미준비 사유와 빈 결과 URL을 보여준다.
 
 ### 실패 응답
 
