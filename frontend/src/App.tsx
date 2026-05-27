@@ -1,11 +1,60 @@
-import { FileText, ReceiptText, Search, Upload } from "lucide-react";
+import { useState } from "react";
+import { AlertCircle, FileText, ReceiptText, Search, Upload } from "lucide-react";
 
 const meetings = [
-  { title: "주간 운영 회의", date: "2026-05-18", status: "요약 대기" },
-  { title: "비용 승인 회의", date: "2026-05-16", status: "보고서 준비" }
+  {
+    id: "weekly-ops",
+    title: "주간 운영 회의",
+    date: "2026-05-18",
+    status: "요약 대기",
+    problems: [
+      {
+        title: "봉사자 일정 변경 공지가 늦어짐",
+        owner: "운영팀",
+        due: "2026-05-20",
+        priority: "높음"
+      },
+      {
+        title: "행사 당일 물품 담당자 미확정",
+        owner: "총무",
+        due: "2026-05-21",
+        priority: "보통"
+      }
+    ]
+  },
+  {
+    id: "expense-approval",
+    title: "비용 승인 회의",
+    date: "2026-05-16",
+    status: "보고서 준비",
+    problems: [
+      {
+        title: "영수증 원본 3건 누락",
+        owner: "회계",
+        due: "2026-05-18",
+        priority: "높음"
+      },
+      {
+        title: "승인 기준 금액 초과 건 검토 필요",
+        owner: "대표",
+        due: "2026-05-19",
+        priority: "보통"
+      },
+      {
+        title: "정산 메일 수신자 목록 업데이트 필요",
+        owner: "사무국",
+        due: "2026-05-19",
+        priority: "낮음"
+      }
+    ]
+  }
 ];
 
 export function App() {
+  const [selectedMeetingId, setSelectedMeetingId] = useState(meetings[0].id);
+  const selectedMeeting =
+    meetings.find((meeting) => meeting.id === selectedMeetingId) ?? meetings[0];
+
   return (
     <main className="min-h-screen bg-zinc-50 text-zinc-950">
       <header className="border-b bg-white">
@@ -61,9 +110,17 @@ export function App() {
             />
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1">
             {meetings.map((meeting) => (
-              <article key={meeting.title} className="rounded-lg border p-4">
+              <button
+                key={meeting.id}
+                className={`rounded-lg border p-4 text-left transition hover:border-sky-300 hover:bg-sky-50 ${
+                  selectedMeetingId === meeting.id ? "border-sky-500 bg-sky-50" : "bg-white"
+                }`}
+                type="button"
+                onClick={() => setSelectedMeetingId(meeting.id)}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="font-medium">{meeting.title}</h3>
@@ -76,10 +133,40 @@ export function App() {
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-zinc-600">
                   <div className="rounded-md bg-zinc-50 p-2">요약</div>
                   <div className="rounded-md bg-zinc-50 p-2">결정</div>
-                  <div className="rounded-md bg-zinc-50 p-2">보고서</div>
+                  <div className="rounded-md bg-zinc-50 p-2">문제 {meeting.problems.length}</div>
                 </div>
-              </article>
+              </button>
             ))}
+            </div>
+
+            <aside className="rounded-lg border bg-zinc-50 p-4">
+              <div className="mb-4 flex items-start gap-3">
+                <AlertCircle className="mt-0.5 h-5 w-5 text-rose-600" />
+                <div>
+                  <h3 className="font-medium">{selectedMeeting.title} 문제</h3>
+                  <p className="mt-1 text-sm text-zinc-500">
+                    {selectedMeeting.problems.length}개 항목
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {selectedMeeting.problems.map((problem) => (
+                  <div key={problem.title} className="rounded-md border bg-white p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-sm font-medium leading-5">{problem.title}</p>
+                      <span className="shrink-0 rounded-full bg-white px-2 py-1 text-xs text-rose-700 ring-1 ring-rose-200">
+                        {problem.priority}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-zinc-500">
+                      <span>담당 {problem.owner}</span>
+                      <span>기한 {problem.due}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </aside>
           </div>
         </section>
       </div>
