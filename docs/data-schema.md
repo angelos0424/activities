@@ -102,7 +102,8 @@ Bot 명령어로 변경되는 runtime config를 저장한다.
 
 ### `sns_post_targets`
 
-Target별 업로드 상태를 추적한다.
+Target별 최신 업로드 상태를 추적한다. 모든 시도 이력은 `sns_post_target_attempts`에 append-only로 남기고,
+이 table은 retry 판단과 사용자-facing summary를 위한 현재 상태만 가진다.
 
 | Column | 타입 | 필수 | 메모 |
 | --- | --- | --- | --- |
@@ -114,6 +115,23 @@ Target별 업로드 상태를 추적한다.
 | safe_error_message | text | no | 사용자에게 보여줄 수 있는 실패 문구 |
 | retry_count | integer | yes | 0~3 |
 | updated_at | text | yes | ISO timestamp |
+
+### `sns_post_target_attempts`
+
+Target별 실제 시도를 기록한다. Provider raw response, token, secret은 저장하지 않고, 사람이 볼 수 있는 안전한
+실패 문구만 `safe_error_message`에 남긴다.
+
+| Column | 타입 | 필수 | 메모 |
+| --- | --- | --- | --- |
+| id | text | yes | Generated id |
+| post_target_id | text | yes | `sns_post_targets.id` 참조 |
+| post_id | text | yes | `sns_posts.id` 참조 |
+| target | text | yes | `instagram`, `facebook`, `homepage` |
+| attempt_number | integer | yes | target별 1부터 시작하는 시도 번호 |
+| status | text | yes | `success`, `failed`, `manual_required`, `skipped` |
+| result_url | text | no | 성공 시 결과 URL |
+| safe_error_message | text | no | 사용자에게 보여줄 수 있는 실패 문구 |
+| created_at | text | yes | ISO timestamp |
 
 ### `todo_items`
 
@@ -195,5 +213,5 @@ data/receipts/{yyyy}/{MM}/{HHMMSS}/{fileid}
 | Google Sheets read | yes | 재시도해도 안전 |
 | Google Sheets append | yes | generated id로 논리적 중복 row 방지 |
 | 로컬 파일 저장 | yes | 같은 fileid를 재사용하고 retry마다 새 파일명을 만들지 않음 |
-| `sns-manager` | yes | target별 재시도. 이미 성공한 target은 다시 업로드하지 않음 |
+| `sns-manager` | yes | `sns_post_targets`로 target별 최신 상태를 보고, `sns_post_target_attempts`에 모든 성공/실패/skipped 시도를 남김. 이미 성공한 target은 다시 업로드하지 않음 |
 | Discord 응답 update | yes | update 실패 시 로컬에 기록하고 종료 |
