@@ -91,4 +91,9 @@
 - [ ] title/content/channel selection을 제출한다.
 - [ ] 여러 JPEG/PNG/MP4 attachment를 업로드한다.
 - [ ] 채널별 결과가 반환되는지 확인한다.
-- [ ] 모든 시도가 기록되는지 확인한다.
+- [x] 모든 시도가 기록되는지 확인한다.
+  - 확인일: 2026-05-29
+  - 검증 결과: 현재 runtime은 `/post` command boundary만 제공하므로 live SQLite adapter를 통한 end-to-end persistence 검증 대상은 아직 없다.
+  - 보완: `sns/src/domains/sns/tracking.ts`와 `sns/src/integrations/storage/snsTrackingSchema.ts`에 request tracking contract와 SQLite DDL contract를 추가했다.
+  - 테스트: `sns/tests/sns-tracking.test.ts`가 성공 target 기록, 실패 target 기록, target별 독립 retry 식별, retry attempt 이력 보존, provider raw response/secret 미저장을 검증한다.
+  - Schema 판정: `sns_posts`는 parent request 상태, `sns_post_targets`는 target별 최신 상태, `sns_post_target_attempts`는 모든 target 시도 이력을 맡도록 `docs/data-schema.md`를 보완했다.
