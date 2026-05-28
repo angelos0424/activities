@@ -22,6 +22,7 @@ export interface SnsPostRecordInput {
   title: string;
   content: string;
   homepageType?: string | null;
+  targets: SnsPostTarget[];
   attempts: SnsTargetAttemptInput[];
   now: string;
 }
@@ -79,15 +80,35 @@ export interface SnsPostTrackingSnapshot {
 const maxRetryCount = 3;
 
 export function buildSnsPostTrackingSnapshot(input: SnsPostRecordInput): SnsPostTrackingSnapshot {
-  const attempts = input.attempts.map((attempt) => ({
-    ...attempt,
-    resultUrl: attempt.resultUrl ?? null,
-    safeErrorMessage: attempt.safeErrorMessage ?? null,
-  }));
+  const attempts = input.attempts.map((attempt) => {
+    if (attempt.attemptNumber < 1) {
+      throw new Error(`Invalid attempt number: ${attempt.attemptNumber}. Must be >= 1.`);
+    }
+
+    return {
+      ...attempt,
+      resultUrl: attempt.resultUrl ?? null,
+      safeErrorMessage: attempt.safeErrorMessage ?? null,
+    };
+  });
   const latestAttempts = latestAttemptByTarget(attempts);
-  const targets = Array.from(latestAttempts.values()).map((attempt) =>
-    buildTargetRecord(input.postId, attempt, input.now),
-  );
+  const targets = input.targets.map((targetName) => {
+    const attempt = latestAttempts.get(targetName);
+    if (attempt) {
+      return buildTargetRecord(input.postId, attempt, input.now);
+    }
+
+    return {
+      id: buildPostTargetId(input.postId, targetName),
+      postId: input.postId,
+      target: targetName,
+      status: "pending" as const,
+      resultUrl: null,
+      safeErrorMessage: null,
+      retryCount: 0,
+      updatedAt: input.now,
+    };
+  });
 
   return {
     post: {

@@ -4,6 +4,7 @@ import {
   buildSnsPostTrackingSnapshot,
   findRetryableTargets,
 } from "../src/domains/sns/tracking.js";
+import type { SnsPostTarget } from "../src/domains/sns/tracking.js";
 import {
   snsTrackingSchemaStatements,
   snsTrackingTableNames,
@@ -55,7 +56,7 @@ describe("SNS post request tracking", () => {
 
   it("records a failed target attempt with only a safe error message", () => {
     const snapshot = buildSnsPostTrackingSnapshot({
-      ...basePostInput(),
+      ...basePostInput(["instagram"]),
       attempts: [
         {
           target: "instagram",
@@ -79,7 +80,7 @@ describe("SNS post request tracking", () => {
 
   it("keeps retry candidates independent by target record", () => {
     const snapshot = buildSnsPostTrackingSnapshot({
-      ...basePostInput(),
+      ...basePostInput(["instagram", "facebook", "homepage"]),
       attempts: [
         {
           target: "instagram",
@@ -111,7 +112,7 @@ describe("SNS post request tracking", () => {
 
   it("keeps every retry attempt while exposing the latest target state", () => {
     const snapshot = buildSnsPostTrackingSnapshot({
-      ...basePostInput(),
+      ...basePostInput(["homepage"]),
       attempts: [
         {
           target: "homepage",
@@ -137,7 +138,7 @@ describe("SNS post request tracking", () => {
 
   it("derives partial success when one selected target succeeds and another fails or skips", () => {
     const snapshot = buildSnsPostTrackingSnapshot({
-      ...basePostInput(),
+      ...basePostInput(["instagram", "facebook", "homepage"]),
       attempts: [
         {
           target: "instagram",
@@ -161,6 +162,62 @@ describe("SNS post request tracking", () => {
     });
 
     assert.equal(snapshot.post.status, "partial_success");
+  });
+
+  it("initializes requested targets without attempts as pending records", () => {
+    const snapshot = buildSnsPostTrackingSnapshot({
+      ...basePostInput(["instagram", "facebook"]),
+      attempts: [
+        {
+          target: "instagram",
+          attemptNumber: 1,
+          status: "success",
+          resultUrl: "https://instagram.test/post/1",
+        },
+      ],
+    });
+
+    assert.equal(snapshot.post.status, "processing");
+    assert.deepEqual(snapshot.targets, [
+      {
+        id: "post-1:instagram",
+        postId: "post-1",
+        target: "instagram",
+        status: "success",
+        resultUrl: "https://instagram.test/post/1",
+        safeErrorMessage: null,
+        retryCount: 0,
+        updatedAt: now,
+      },
+      {
+        id: "post-1:facebook",
+        postId: "post-1",
+        target: "facebook",
+        status: "pending",
+        resultUrl: null,
+        safeErrorMessage: null,
+        retryCount: 0,
+        updatedAt: now,
+      },
+    ]);
+  });
+
+  it("rejects target attempts whose attempt number cannot satisfy the SQLite constraint", () => {
+    assert.throws(
+      () =>
+        buildSnsPostTrackingSnapshot({
+          ...basePostInput(["homepage"]),
+          attempts: [
+            {
+              target: "homepage",
+              attemptNumber: 0,
+              status: "failed",
+              safeErrorMessage: "Homepage 업로드를 완료하지 못했습니다.",
+            },
+          ],
+        }),
+      /Invalid attempt number: 0\. Must be >= 1\./,
+    );
   });
 });
 
@@ -190,7 +247,7 @@ describe("SNS SQLite tracking schema", () => {
   });
 });
 
-function basePostInput() {
+function basePostInput(targets: SnsPostTarget[] = ["homepage"]) {
   return {
     postId: "post-1",
     discordGuildId: "guild-1",
@@ -199,6 +256,7 @@ function basePostInput() {
     title: "SNS post title",
     content: "SNS post content",
     homepageType: "notice",
+    targets,
     now,
   };
 }
